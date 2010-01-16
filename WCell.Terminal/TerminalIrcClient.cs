@@ -9,7 +9,6 @@ using Squishy.Irc.Protocol;
 using Squishy.Network;
 using StringStream = Squishy.Network.StringStream;
 
-
 namespace WCell.Terminal
 {
 	public class TerminalIrcClient : IrcClient

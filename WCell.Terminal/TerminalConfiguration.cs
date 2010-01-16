@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
+using System.Reflection;
+using System.IO;
 using WCell.Util.Variables;
 
 namespace WCell.Terminal
@@ -16,8 +18,8 @@ namespace WCell.Terminal
 		#region Terminal Config
 		public static Boolean AutoStartAuthServer = true;
 		public static Boolean AutoStartRealmServer = true;
-		public static String AuthServerPath = @"H:\Projects\WCellHeroes\Run\AuthServer\Debug\WCell.AuthServerConsole.exe";
-		public static String RealmServerPath = @"H:\Projects\WCellHeroes\Run\RealmServer\Debug\WCell.RealmServerConsole.exe";
+		public static String AuthServerPath = Path.Combine(Directory.GetCurrentDirectory(), "WCell.AuthServerConsole.exe");
+		public static String RealmServerPath = Path.Combine(Directory.GetCurrentDirectory(), "WCell.RealmServerConsole.exe");
 		public static String DefaultServer = "euroserv.fr.quakenet.org";
 		public static int DefaultPort = 6667;
 		public static String DefaultNick = "Sylvanas";
@@ -58,7 +60,7 @@ namespace WCell.Terminal
 		{
 			get
 			{
-				return @"H:\Projects\WCellTerminal\WCell.Terminal\bin\Debug\cfg\" + ConfigFilename;
+				return Path.Combine(Directory.GetCurrentDirectory(), ConfigFilename);
 			}
 			set
 			{

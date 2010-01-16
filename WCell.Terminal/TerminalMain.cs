@@ -2,28 +2,39 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.IO;
+using System.Windows.Forms;
 using System.Reflection;
-using Squishy.Irc;
-using Squishy.Irc.Auth;
-using Squishy.Irc.Commands;
-using Squishy.Irc.Protocol;
-using Squishy.Network;
-using WCell.Util.Variables;
+using System.Runtime.InteropServices;
 
 namespace WCell.Terminal
 {
-	class TerminalMain
+	class TerminalMain : ApplicationContext
 	{
-		public static StreamWriter terminaloutput = null;
+		delegate bool ConsoleEventHandlerDelegate(ConsoleHandlerEventCode eventCode);
 
+		[DllImport("kernel32.dll")]
+		static extern bool SetConsoleCtrlHandler(ConsoleEventHandlerDelegate handlerProc, bool add);
+
+		enum ConsoleHandlerEventCode : uint
+		{
+			CTRL_C_EVENT = 0,
+			CTRL_BREAK_EVENT = 1,
+			CTRL_CLOSE_EVENT = 2,
+			CTRL_LOGOFF_EVENT = 5,
+			CTRL_SHUTDOWN_EVENT = 6
+		}
+		static ConsoleEventHandlerDelegate consoleHandler;
+		public static SysTrayNotifyIcon notification = new SysTrayNotifyIcon();
+		String dateTime = DateTime.Now.ToString("hh:mm");
+
+		#region Config
 		private static TerminalConfiguration m_configuration;
 		public TerminalConfiguration Configuration
 		{
 			get { return m_configuration; }
 		}
 
-		protected static string s_entryLocation;
+		private static string s_entryLocation;
 
 		private static string EntryLocation
 		{
@@ -37,22 +48,26 @@ namespace WCell.Terminal
 						s_entryLocation = asm.Location;
 					}
 				}
-
 				return s_entryLocation;
 			}
 			set { s_entryLocation = value; }
 		}
+		#endregion
 
-		static void Main(string[] args)
+		public TerminalMain()
 		{
-			String command;
-			String dateTime = DateTime.Now.ToString("hh:mm");
-			Console.Title = "WCell Terminal v0.1";
+			consoleHandler = new ConsoleEventHandlerDelegate(ConsoleEventHandler);
+			SetConsoleCtrlHandler(consoleHandler, true);
+
+			Version vrs = new Version(Application.ProductVersion);
+			Console.Title = String.Format("WCell.Terminal v{0}.{1}", vrs.Major, vrs.Minor);
 			Console.ForegroundColor = ConsoleColor.White;
+			notification.Visible = true;
 
 			m_configuration = new TerminalConfiguration(EntryLocation);
 
-			var connection = new TerminalIrcClient{
+			var connection = new TerminalIrcClient
+			{
 				Nicks = new[] { TerminalConfiguration.DefaultNick, TerminalConfiguration.AlternateNick1, TerminalConfiguration.AlternateNick2 },
 				UserName = TerminalConfiguration.DefaultUserName,
 				Info = TerminalConfiguration.DefaultInfo
@@ -71,9 +86,9 @@ namespace WCell.Terminal
 			if (TerminalConfiguration.AutoStartAuthServer)
 			{
 				ProcessRunner AuthServer = new ProcessRunner(TerminalConfiguration.AuthServerPath);
-				ProcessOutputEventHandler AuthServerOutputHandler = delegate(object o, ProcessOutputEventArgs e)
+				ProcessOutputEventHandler AuthServerOutputHandler = delegate(object o, ProcessOutputEventArgs ex)
 				{
-					Console.WriteLine("({0}) <AuthServer> {1}", dateTime, e.Data);
+					Console.WriteLine("({0}) <AuthServer> {1}", dateTime, ex.Data);
 				};
 				AuthServer.OutputReceived += AuthServerOutputHandler;
 				AuthServer.Start();
@@ -82,19 +97,34 @@ namespace WCell.Terminal
 			if (TerminalConfiguration.AutoStartRealmServer)
 			{
 				ProcessRunner RealmServer = new ProcessRunner(TerminalConfiguration.RealmServerPath);
-				ProcessOutputEventHandler RealmServerOutputHandler = delegate(object o, ProcessOutputEventArgs e)
+				ProcessOutputEventHandler RealmServerOutputHandler = delegate(object o, ProcessOutputEventArgs ex)
 				{
-					Console.WriteLine("({0}) <RealmServer> {1}", dateTime, e.Data);
+					Console.WriteLine("({0}) <RealmServer> {1}", dateTime, ex.Data);
 				};
 				RealmServer.OutputReceived += RealmServerOutputHandler;
 				RealmServer.Start();
 			}
+		}
 
-			do
+		static bool ConsoleEventHandler(ConsoleHandlerEventCode eventCode)
+		{
+			switch (eventCode)
 			{
-				command = Console.ReadLine();
-				Console.WriteLine("> {0}", command);
-			} while (command != "quit");
+				case ConsoleHandlerEventCode.CTRL_C_EVENT:
+				case ConsoleHandlerEventCode.CTRL_BREAK_EVENT:
+				case ConsoleHandlerEventCode.CTRL_CLOSE_EVENT:
+				case ConsoleHandlerEventCode.CTRL_LOGOFF_EVENT:
+				case ConsoleHandlerEventCode.CTRL_SHUTDOWN_EVENT:
+				default:
+					notification.Dispose();
+					break;
+			}
+			return (false);
+		}
+
+		static void Main(string[] args)
+		{
+			Application.Run(new TerminalMain());
 		}
 	}
 }

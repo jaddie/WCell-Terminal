@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("WCell.Terminal")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("DeKaDenCe")]
+[assembly: AssemblyCompany("DeKaDeNcE")]
 [assembly: AssemblyProduct("WCell.Terminal")]
 [assembly: AssemblyCopyright("Copyright © ZaDarkSide 2010")]
 [assembly: AssemblyTrademark("")]

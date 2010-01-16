@@ -8,7 +8,7 @@ namespace Squishy.Irc.Protocol
 {
 	public class IrcProtocolHandler : IProtocolHandler
 	{
-		private const string packetTerminator = "\r\n";
+		private const string PacketTerminator = "\r\n";
 
 		private readonly Connection.BytesReceivedHandler rcvdHandler;
 		private Connection con;
@@ -60,7 +60,11 @@ namespace Squishy.Irc.Protocol
 				}
 				else
 				{
-					if (handlers.Count > 1)
+					if (handlers.Count == 1)
+					{
+						handlers[0](packet);
+					}
+					else if (handlers.Count > 1)
 					{
 						var pos = packet.Content.Position;
 						for (var i = 0; i < handlers.Count; i++)
@@ -69,10 +73,6 @@ namespace Squishy.Irc.Protocol
 							handler(packet);
 							packet.Content.Position = pos;
 						}
-					}
-					else if (handlers.Count > 0)
-					{
-						handlers[0](packet);
 					}
 				}
 
@@ -123,27 +123,26 @@ namespace Squishy.Irc.Protocol
 				prefix = line.NextWord();
 			}
 
-			string action = line.NextWord();
-
+			var action = line.NextWord();
 			var packet = new IrcPacket(irc, prefix, action, new StringStream(line.Remainder.Trim()), line.String)
-			             	{
-			             		protHandler = this
-			             	};
+			{
+				protHandler = this
+			};
 
 			return packet;
 		}
 
 		public IrcPacket[] ExtractPackets(ByteBuffer partialResponse)
 		{
-			string str = partialResponse.GetString(encoding);
-			string response = lastResponsePart + str;
+			var str = partialResponse.GetString(encoding);
+			var response = lastResponsePart + str;
 			var ss = new StringStream(response);
-			var packets = new List<IrcPacket>();
+			var packets = new List<IrcPacket>(3);
 
 			while (ss.HasNext)
 			{
-				string content = ss.NextWord(packetTerminator);
-				if (!ss.HasNext && !response.EndsWith(packetTerminator))
+				var content = ss.NextWord(PacketTerminator);
+				if (!ss.HasNext && !response.EndsWith(PacketTerminator))
 				{
 					lastResponsePart = content;
 				}
@@ -244,7 +243,7 @@ namespace Squishy.Irc.Protocol
 				}
 				else
 				{
-                    // user privs
+					// user privs
 					var priv = irc.GetPrivForFlag(flags[i]);
 					if (priv != Privilege.Regular)
 					{

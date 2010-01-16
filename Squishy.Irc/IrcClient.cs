@@ -6,6 +6,7 @@ using Squishy.Irc.Commands;
 using Squishy.Irc.Protocol;
 using Squishy.Network;
 using Squishy.Irc.Auth;
+using System.Text.RegularExpressions;
 
 namespace Squishy.Irc
 {
@@ -17,6 +18,7 @@ namespace Squishy.Irc
 	public class IrcClient
 	{
 		public static readonly Privilege[] Privileges = (Privilege[])Enum.GetValues(typeof(Privilege));
+		public static readonly Regex WhiteSpace = new Regex("\\s");
 
 		#region Fields
 
@@ -37,6 +39,7 @@ namespace Squishy.Irc
 		private string m_server;
 		private IDictionary<string, UnbanTimer> m_unbanTimers;
 		protected IrcProtocolHandler protHandler;
+		protected int m_MaxNickLen = 30;
 
 		/// <summary>
 		/// Contains information and tools to operate on this specific Network.
@@ -44,7 +47,7 @@ namespace Squishy.Irc
 		public readonly IrcNetworkInfo Network = new IrcNetworkInfo();
 
 		public string ServerPassword = "";
-		public string UserName;
+		private string m_UserName;
 
 		#endregion
 
@@ -95,6 +98,38 @@ namespace Squishy.Irc
 		public IrcCommandHandler CommandHandler
 		{
 			get { return m_CommandHandler; }
+		}
+
+		/// <summary>
+		/// The username to be used. 
+		/// Changing this will not have an effect before you connect to a network again.
+		/// </summary>
+		public string UserName
+		{
+			get { return m_UserName; }
+			set
+			{
+				if (WhiteSpace.IsMatch(value))
+				{
+					throw new ArgumentException("Username must not have whitespaces in it: " + value);
+				}
+				m_UserName = value;
+			}
+		}
+
+		public int MaxNickLen
+		{
+			get { return m_MaxNickLen; }
+			internal set
+			{
+				m_MaxNickLen = value;
+				if (Me.Nick.Length > value)
+				{
+					Client.Disconnect();
+					throw new InvalidOperationException(string.Format("Your Nick name is too long (max length: {0}): {1}",
+						value, Me.Nick));
+				}
+			}
 		}
 
 		/// <summary>
@@ -220,7 +255,7 @@ namespace Squishy.Irc
 		/// <param name="port">The port on the Server where the Client should connect to</param>
 		public void BeginConnect(string addr, int port)
 		{
-			m_me.SetInfo(m_nicks[0], UserName.Replace(" ", ""), ServerPassword, Info);
+			m_me.SetInfo(m_nicks[0], UserName, ServerPassword, Info);
 			m_client.BeginConnect(addr, port);
 		}
 
@@ -524,6 +559,12 @@ namespace Squishy.Irc
 					case "CHANTYPES":
 						m_CTypes = value;
 						break;
+					case "MAXNICKLEN":
+						if (!int.TryParse(value, out m_MaxNickLen))
+						{
+							m_MaxNickLen = 30;
+						}
+						break;
 					case "PREFIX":
 						var pair = value.Substring(1).Split(')');
 						m_CPrefixes = pair[0];
@@ -636,11 +677,11 @@ namespace Squishy.Irc
 
 		internal void CtcpRequestNotify(IrcUser user, IrcChannel chan, string request, string text)
 		{
-            if (request.ToUpper() == "DCC" && chan == null)
-            {
-                Dcc.Handle(user, text);
-            }
-		    OnCtcpRequest(user, chan, request, text);
+			if (request.ToUpper() == "DCC" && chan == null)
+			{
+				Dcc.Handle(user, text);
+			}
+			OnCtcpRequest(user, chan, request, text);
 		}
 
 
@@ -677,7 +718,9 @@ namespace Squishy.Irc
 				m_loggedIn = true;
 			IrcChannel chan;
 			if (user == Me)
+			{
 				Me.DeleteChannel(name);
+			}
 			if ((chan = GetChannel(name)) == null)
 			{
 				Send("mode " + name);
@@ -951,12 +994,16 @@ namespace Squishy.Irc
 
 		internal void QuitNotify(IrcUser user, string reason)
 		{
-			foreach (IrcChannel chan in user.Channels.Values)
+			foreach (var chan in user.Channels.Values)
+			{
 				chan.UserLeftNotify(user, reason);
+			}
 			OnQuit(user, reason);
 			m_Users.Remove(user.Nick);
 			if (user == Me)
+			{
 				m_client.Disconnect();
+			}
 		}
 
 		/// <summary>

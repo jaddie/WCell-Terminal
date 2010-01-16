@@ -65,16 +65,16 @@ namespace Squishy.Irc
             Add((Privilege)flag);
 		}
 
-        internal void Add(Privilege flag)
-        {
-            set.Add(flag);
-            var lvl = privMap[highestPriv];
-            if (privMap[flag] > lvl)
-            {
-                highestPriv = flag;
-                highestPrivLvl = lvl;
-            }
-        }
+		internal void Add(Privilege flag)
+		{
+			set.Add(flag);
+			_PrivLevel lvl;
+			if (privMap.TryGetValue(highestPriv, out lvl) && privMap[flag] > lvl)
+			{
+				highestPriv = flag;
+				highestPrivLvl = lvl;
+			}
+		}
 
 
 		internal void Remove(char flag)

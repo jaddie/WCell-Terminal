@@ -134,12 +134,11 @@ namespace Squishy.Irc.Protocol
 			// Connection Handling
 			AddPacketHandler("001", delegate(IrcPacket packet) {
 				// :Serv 001 Me :<Welcomemessage>
-				packet.IrcClient.Me.ChangeNick(packet.Content.Remainder);
+				packet.IrcClient.Me.ChangeNick(packet.Content.NextWord());
 				defaultPacketHandler(packet);
 			});
 
-			AddPacketHandler("005",
-							 delegate(IrcPacket packet) { packet.IrcClient.ConnectionInfoNotify(packet); });
+			AddPacketHandler("005", delegate(IrcPacket packet) { packet.IrcClient.ConnectionInfoNotify(packet); });
 
 			AddPacketHandler("376", delegate(IrcPacket packet) { packet.IrcClient.PerformNotify(); });
 
