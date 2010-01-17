@@ -45,6 +45,8 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -52,111 +54,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArrayExtensions.cs" />
-    <Compile Include="Commands\BaseCommand.cs" />
-    <Compile Include="Commands\CmdArgs.cs" />
-    <Compile Include="Commands\CmdTrigger.cs" />
-    <Compile Include="Commands\Command.cs" />
-    <Compile Include="Commands\CommandMgr.cs" />
-    <Compile Include="Commands\IBufferedCommandResponse.cs" />
-    <Compile Include="Commands\ITriggerer.cs" />
-    <Compile Include="Commands\NestedCmdTrigger.cs" />
-    <Compile Include="Commands\SilentCmdTrigger.cs" />
-    <Compile Include="Conversion\Converters.cs" />
-    <Compile Include="Conversion\IConverter.cs" />
-    <Compile Include="Conversion\IConverterProvider.cs" />
-    <Compile Include="Conversion\ToUIntConverter.cs" />
-    <Compile Include="Data\BinaryContentStream.cs" />
-    <Compile Include="Data\DataFieldProxy.cs" />
-    <Compile Include="Data\DataHolderMgr.cs" />
-    <Compile Include="Data\DataHolderState.cs" />
-    <Compile Include="Data\Delegates.cs" />
-    <Compile Include="Data\BinaryPersistors.cs" />
-    <Compile Include="DB\BaseDataColumn.cs" />
-    <Compile Include="DB\DataFieldType.cs" />
-    <Compile Include="DB\DataHolderTableMapping.cs" />
-    <Compile Include="Conversion\IFieldReader.cs" />
-    <Compile Include="DB\IDbWrapper.cs" />
-    <Compile Include="DB\KeyValueListBase.cs" />
-    <Compile Include="DB\LightDBDefinitionSet.cs" />
-    <Compile Include="DB\LightDBMgr.cs" />
-    <Compile Include="Data\DataFields.cs" />
-    <Compile Include="Data\DataHolderException.cs" />
-    <Compile Include="DB\LightDBMapper.cs" />
-    <Compile Include="Data\Attributes.cs" />
-    <Compile Include="Data\IDataHolder.cs" />
-    <Compile Include="DB\SimpleDataColumn.cs" />
-    <Compile Include="DB\NestedDataColumn.cs" />
-    <Compile Include="DB\Patterns.cs" />
-    <Compile Include="DB\TableDefinition.cs" />
-    <Compile Include="DB\Xml\ArrayConstraint.cs" />
-    <Compile Include="DB\Xml\Column.cs" />
-    <Compile Include="DB\Xml\DefVersion.cs" />
-    <Compile Include="DB\Xml\PrimaryColumn.cs" />
-    <Compile Include="DB\Xml\IHasDataFieldDefinitions.cs" />
-    <Compile Include="DB\Xml\INestedFieldDefinition.cs" />
-    <Compile Include="DB\Xml\IDataFieldDefinition.cs" />
-    <Compile Include="DB\Xml\IFlatField.cs" />
-    <Compile Include="DB\Xml\LightRecordXmlConfig.cs" />
-    <Compile Include="Data\DataHolderDefinition.cs" />
-    <Compile Include="DB\Xml\NestedSimpleFieldDefinition.cs" />
-    <Compile Include="DB\Xml\ArrayFieldDefinitions.cs" />
-    <Compile Include="DB\Xml\BasicTableDefinitions.cs" />
-    <Compile Include="DB\Xml\XmlDataHolderDefinition.cs" />
-    <Compile Include="DB\Xml\DataFieldDefinition.cs" />
-    <Compile Include="DB\Xml\SimpleFlatFieldDefinition.cs" />
-    <Compile Include="DB\Xml\BasicTableDefinition.cs" />
-    <Compile Include="DB\Xml\XmlWhereClause.cs" />
-    <Compile Include="DotNetDocs\MemberType.cs" />
-    <Compile Include="DynamicAccess\DontCopyAttribute.cs" />
-    <Compile Include="DynamicAccess\IExecutable.cs" />
-    <Compile Include="DynamicAccess\IGenericPropertyAccessor.cs" />
-    <Compile Include="EmailSyntaxValidator.cs" />
+    <Compile Include="ConsoleUtil.cs" />
     <Compile Include="EnumUtil.cs" />
-    <Compile Include="Graphics\2DConstants.cs" />
-    <Compile Include="Graphics\BoundingBox.cs" />
-    <Compile Include="Graphics\BoundingSphere.cs" />
-    <Compile Include="Graphics\Color.cs" />
-    <Compile Include="Graphics\HalfSingle.cs" />
-    <Compile Include="Graphics\HalfUtils.cs" />
-    <Compile Include="Graphics\IPackedVector.cs" />
-    <Compile Include="Graphics\Matrix.cs" />
-    <Compile Include="Graphics\OBB.cs" />
-    <Compile Include="Graphics\Plane.cs" />
-    <Compile Include="Graphics\Quaternion.cs" />
-    <Compile Include="Graphics\Ray.cs" />
-    <Compile Include="Graphics\Vector2.cs" />
-    <Compile Include="Graphics\Vector3.cs" />
-    <Compile Include="Graphics\Vector4.cs" />
-    <Compile Include="IDataColumn.cs" />
-    <Compile Include="IGetterSetter.cs" />
-    <Compile Include="DynamicAccess\PropertyAccessorException.cs" />
-    <Compile Include="DynamicAccess\AccessorMgr.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="INamed.cs" />
     <Compile Include="IndentTextWriter.cs" />
-    <Compile Include="IProducer.cs" />
     <Compile Include="AppUtil.cs" />
-    <Compile Include="DotNetDocs\DocEntry.cs" />
-    <Compile Include="DotNetDocs\DotNetDocumentation.cs" />
-    <Compile Include="IStreamTarget.cs" />
     <Compile Include="MathUtil.cs" />
     <Compile Include="NLog\LogUtil.cs" />
     <Compile Include="NLog\StreamLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReflectionUtils.cs" />
-    <Compile Include="StringStream.cs" />
     <Compile Include="Strings\StringNode.cs" />
-    <Compile Include="Strings\StringTree.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Strings\StringTree.cs" />
     <Compile Include="StringUtils.cs" />
     <Compile Include="SvnUtil.cs" />
-    <Compile Include="Threading\IContextHandler.cs" />
-    <Compile Include="Threading\Messages.cs" />
-    <Compile Include="Toolshed\Attributes.cs" />
-    <Compile Include="DynamicAccess\MethodExcecutable.cs" />
-    <Compile Include="Toolshed\ToolException.cs" />
-    <Compile Include="Toolshed\ToolMgr.cs" />
     <Compile Include="Utility.cs" />
     <Compile Include="Variables\ConfigUtil.cs" />
     <Compile Include="Variables\IConfiguration.cs" />
@@ -171,9 +81,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="WCell.Utils.Sign.snk" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Expressions\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -52,6 +52,14 @@ namespace WCell.Util
 		{
 			get { return (Environment.OSVersion.Platform == PlatformID.Win32NT) && (Environment.OSVersion.Version.Major >= 6); }
 		}
+
+		/// <summary>
+		/// Gets a value indicating if the operating system is a Windows Seven or a newer one.
+		/// </summary>
+		public static bool IsWindowsSevenOrNewer
+		{
+			get { return (Environment.OSVersion.Platform == PlatformID.Win32NT) && (Environment.OSVersion.Version.Major >= 7); }
+		}
 		#endregion
 
 		#region Application Exit Handling
@@ -123,8 +131,6 @@ namespace WCell.Util
 			ctrlHandlers.Add(ctrlConsoleCtrlHandler);
 
 			SetConsoleCtrlHandler(ctrlConsoleCtrlHandler, true);
-
-
 		}
 		#endregion
 	}

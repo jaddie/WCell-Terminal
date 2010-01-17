@@ -1000,14 +1000,6 @@ namespace WCell.Util
 		}
 
 		/// <summary>
-		/// Checks whether the given mail-address is valid.
-		/// </summary>
-		public static bool IsValidMail(string mail)
-		{
-			return EmailSyntaxValidator.Valid(mail, false);
-		}
-
-		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="arrType"></param>

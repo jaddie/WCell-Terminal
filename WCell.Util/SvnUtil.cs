@@ -26,11 +26,6 @@ namespace WCell.Util
 			int.TryParse(versionStr, out repoRevision);
 
 			return repoRevision;
-
-
-
-
-
 		}
 	}
 }
