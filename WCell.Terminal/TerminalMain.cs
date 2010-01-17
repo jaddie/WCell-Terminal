@@ -5,27 +5,14 @@ using System.Text;
 using System.Windows.Forms;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.IO;
+using WCell.Util;
 
 namespace WCell.Terminal
 {
 	class TerminalMain : ApplicationContext
 	{
-		delegate bool ConsoleEventHandlerDelegate(ConsoleHandlerEventCode eventCode);
-
-		[DllImport("kernel32.dll")]
-		static extern bool SetConsoleCtrlHandler(ConsoleEventHandlerDelegate handlerProc, bool add);
-
-		enum ConsoleHandlerEventCode : uint
-		{
-			CTRL_C_EVENT = 0,
-			CTRL_BREAK_EVENT = 1,
-			CTRL_CLOSE_EVENT = 2,
-			CTRL_LOGOFF_EVENT = 5,
-			CTRL_SHUTDOWN_EVENT = 6
-		}
-		static ConsoleEventHandlerDelegate consoleHandler;
-		public static SysTrayNotifyIcon notification = new SysTrayNotifyIcon();
-		String dateTime = DateTime.Now.ToString("hh:mm");
+		public static SysTrayNotifyIcon notification;
 
 		#region Config
 		private static TerminalConfiguration m_configuration;
@@ -54,31 +41,62 @@ namespace WCell.Terminal
 		}
 		#endregion
 
+		static void ConsoleEventHandler()
+		{
+			notification.Dispose();
+		}
+
 		public TerminalMain()
 		{
-			consoleHandler = new ConsoleEventHandlerDelegate(ConsoleEventHandler);
-			SetConsoleCtrlHandler(consoleHandler, true);
-
+			WCell.Util.AppUtil.AddApplicationExitHandler(ConsoleEventHandler);
 			Version vrs = new Version(Application.ProductVersion);
-			Console.Title = String.Format("WCell.Terminal v{0}.{1}", vrs.Major, vrs.Minor);
+			try
+			{
+				String ExePath = Directory.GetCurrentDirectory();
+				String SourcePath = Directory.GetParent(Directory.GetParent(ExePath).FullName).FullName;
+				int Revision = WCell.Util.SvnUtil.GetVersionNumber(SourcePath);
+				Console.Title = String.Format("WCell.Terminal v{0}.{1} rev {2}", vrs.Major, vrs.Minor, Revision);
+			}
+			catch (DirectoryNotFoundException)
+			{
+				Console.Title = String.Format("WCell.Terminal v{0}.{1} rev unknown", vrs.Major, vrs.Minor);
+			}
 			Console.ForegroundColor = ConsoleColor.White;
+			notification = new SysTrayNotifyIcon();
 			notification.Visible = true;
 
 			m_configuration = new TerminalConfiguration(EntryLocation);
 
-			var connection = new TerminalIrcClient
+			if (TerminalConfiguration.ConsoleCenterOnScreen)
 			{
-				Nicks = new[] { TerminalConfiguration.DefaultNick, TerminalConfiguration.AlternateNick1, TerminalConfiguration.AlternateNick2 },
-				UserName = TerminalConfiguration.DefaultUserName,
-				Info = TerminalConfiguration.DefaultInfo
+				ConsoleUtil.CenterConsoleWindow(TerminalConfiguration.ConsoleWidth, TerminalConfiguration.ConsoleHeight);
+			}
+			
+			if (TerminalConfiguration.ConsoleWidth != 80)
+			{
+				Console.BufferWidth = TerminalConfiguration.ConsoleWidth;
+				Console.WindowWidth = TerminalConfiguration.ConsoleWidth;
+			}
+
+			if (TerminalConfiguration.ConsoleHeight != 25)
+			{
+				Console.WindowHeight = TerminalConfiguration.ConsoleHeight;
+			}			
+			Console.BufferHeight = Int16.MaxValue - 1;
+
+			var connection = new IRCInterface
+			{
+				Nicks = new[] { IRCInterface.DefaultNick, IRCInterface.AlternateNick1, IRCInterface.AlternateNick2 },
+				UserName = IRCInterface.DefaultUserName,
+				Info = IRCInterface.DefaultInfo
 			};
-			if (TerminalIrcClient.IRCEnabled)
+			if (IRCInterface.IRCEnabled)
 			{
-				connection.BeginConnect(TerminalConfiguration.DefaultServer, TerminalConfiguration.DefaultPort);
+				connection.BeginConnect(IRCInterface.DefaultServer, IRCInterface.DefaultPort);
 			}
 			else
 			{
-				Console.WriteLine("({0}) <IRC Interface> Disabled", dateTime);
+				Console.WriteLine("({0}) <IRC Interface> Disabled", DateTime.Now.ToString("hh:mm"));
 			}
 
 			var webinterface = new WebInterface();
@@ -88,7 +106,23 @@ namespace WCell.Terminal
 				ProcessRunner AuthServer = new ProcessRunner(TerminalConfiguration.AuthServerPath);
 				ProcessOutputEventHandler AuthServerOutputHandler = delegate(object o, ProcessOutputEventArgs ex)
 				{
-					Console.WriteLine("({0}) <AuthServer> {1}", dateTime, ex.Data);
+					if (ex.Data.Contains("[Error]"))
+					{
+						Console.ForegroundColor = ConsoleColor.Red;
+					}
+					else if (ex.Data.Contains("[Warn]"))
+					{
+						Console.ForegroundColor = ConsoleColor.Yellow;
+					}
+					else if (ex.Data.Contains("[Debug]"))
+					{
+						Console.ForegroundColor = ConsoleColor.Gray;
+					}
+					else
+					{
+						Console.ForegroundColor = ConsoleColor.White;
+					}
+					Console.WriteLine("({0}) <AuthServer> {1}", DateTime.Now.ToString("hh:mm"), ex.Data);
 				};
 				AuthServer.OutputReceived += AuthServerOutputHandler;
 				AuthServer.Start();
@@ -99,27 +133,27 @@ namespace WCell.Terminal
 				ProcessRunner RealmServer = new ProcessRunner(TerminalConfiguration.RealmServerPath);
 				ProcessOutputEventHandler RealmServerOutputHandler = delegate(object o, ProcessOutputEventArgs ex)
 				{
-					Console.WriteLine("({0}) <RealmServer> {1}", dateTime, ex.Data);
+					if (ex.Data.Contains("[Error]"))
+					{
+						Console.ForegroundColor = ConsoleColor.Red;
+					}
+					else if (ex.Data.Contains("[Warn]"))
+					{
+						Console.ForegroundColor = ConsoleColor.Yellow;
+					}
+					else if (ex.Data.Contains("[Debug]"))
+					{
+						Console.ForegroundColor = ConsoleColor.Gray;
+					}
+					else
+					{
+						Console.ForegroundColor = ConsoleColor.White;
+					}
+					Console.WriteLine("({0}) <RealmServer> {1}", DateTime.Now.ToString("hh:mm"), ex.Data);
 				};
 				RealmServer.OutputReceived += RealmServerOutputHandler;
 				RealmServer.Start();
 			}
-		}
-
-		static bool ConsoleEventHandler(ConsoleHandlerEventCode eventCode)
-		{
-			switch (eventCode)
-			{
-				case ConsoleHandlerEventCode.CTRL_C_EVENT:
-				case ConsoleHandlerEventCode.CTRL_BREAK_EVENT:
-				case ConsoleHandlerEventCode.CTRL_CLOSE_EVENT:
-				case ConsoleHandlerEventCode.CTRL_LOGOFF_EVENT:
-				case ConsoleHandlerEventCode.CTRL_SHUTDOWN_EVENT:
-				default:
-					notification.Dispose();
-					break;
-			}
-			return (false);
 		}
 
 		static void Main(string[] args)

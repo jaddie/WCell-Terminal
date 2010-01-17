@@ -15,31 +15,28 @@ namespace WCell.Terminal
 		public static string ListenAddress = IPAddress.Loopback.ToString();
 		public static int Port = 8080;
 		public static bool Enabled = true;
-		String dateTime;
 
 		public WebInterface()
 		{
-			dateTime = DateTime.Now.ToString("hh:mm");
-
 			if (Enabled)
 			{				
 				try
 				{
 					myListener = new TcpListener( IPAddress.Parse(ListenAddress), Port);
 					myListener.Start();
-					Console.WriteLine("({0}) <Web Interface> Running on Port {1}...", dateTime, Port);
+					Console.WriteLine("({0}) <Web Interface> Running on Port {1}...", DateTime.Now.ToString("hh:mm"), Port);
 
 					Thread th = new Thread(new ThreadStart(StartListen));
 					th.Start();
 				}
 				catch (Exception e)
 				{
-					Console.WriteLine("({0}) <Web Interface> An Exception Occurred while Listening: {1}", dateTime, e.ToString());
+					Console.WriteLine("({0}) <Web Interface> An Exception Occurred while Listening: {1}", DateTime.Now.ToString("hh:mm"), e.ToString());
 				}
 			}
 			else
 			{
-				Console.WriteLine("({0}) <Web Interface> Disabled", dateTime);
+				Console.WriteLine("({0}) <Web Interface> Disabled", DateTime.Now.ToString("hh:mm"));
 			}
 		}
 
@@ -56,17 +53,17 @@ namespace WCell.Terminal
 			while (true)
 			{
 				Socket mySocket = myListener.AcceptSocket();
-				Console.WriteLine("({0}) <Web Interface> Socket Type {1}", dateTime, mySocket.SocketType);
+				Console.WriteLine("({0}) <Web Interface> Socket Type {1}", DateTime.Now.ToString("hh:mm"), mySocket.SocketType);
 				if (mySocket.Connected)
 				{
-					Console.WriteLine("({0}) <Web Interface> Client Connected!!!", dateTime);
-					Console.WriteLine("({0}) <Web Interface> Client IP {1}", dateTime, mySocket.RemoteEndPoint);
+					Console.WriteLine("({0}) <Web Interface> Client Connected!!!", DateTime.Now.ToString("hh:mm"));
+					Console.WriteLine("({0}) <Web Interface> Client IP {1}", DateTime.Now.ToString("hh:mm"), mySocket.RemoteEndPoint);
 					Byte[] bReceive = new Byte[1024];
 					int i = mySocket.Receive(bReceive, bReceive.Length, 0);
 					string sBuffer = Encoding.ASCII.GetString(bReceive);
 					if (sBuffer.Substring(0, 3) != "GET")
 					{
-						Console.WriteLine("({0}) <Web Interface> Only Get Method is supported...", dateTime);
+						Console.WriteLine("({0}) <Web Interface> Only Get Method is supported...", DateTime.Now.ToString("hh:mm"));
 						mySocket.Close();
 						return;
 					}
@@ -116,7 +113,7 @@ namespace WCell.Terminal
 			sBuffer = sBuffer + "Content-Length: " + iTotBytes + "\r\n\r\n";
 			Byte[] bSendData = Encoding.ASCII.GetBytes(sBuffer);
 			SendToBrowser(bSendData, ref mySocket);
-			Console.WriteLine("({0}) <Web Interface> Total Bytes : ", dateTime ,iTotBytes.ToString());
+			Console.WriteLine("({0}) <Web Interface> Total Bytes : ", DateTime.Now.ToString("hh:mm"), iTotBytes.ToString());
 		}
 
 		public void SendToBrowser(String sData, ref Socket mySocket)
@@ -133,21 +130,21 @@ namespace WCell.Terminal
 				{
 					if ((numBytes = mySocket.Send(bSendData, bSendData.Length, 0)) == -1)
 					{
-						Console.WriteLine("({0}) <Web Interface> Socket Error cannot Send Packet", dateTime);
+						Console.WriteLine("({0}) <Web Interface> Socket Error cannot Send Packet", DateTime.Now.ToString("hh:mm"));
 					}
 					else
 					{
-						Console.WriteLine("({0}) <Web Interface> No. of bytes send {1}", dateTime, numBytes);
+						Console.WriteLine("({0}) <Web Interface> No. of bytes send {1}", DateTime.Now.ToString("hh:mm"), numBytes);
 					}
 				}
 				else
 				{
-					Console.WriteLine("({0}) <Web Interface> Connection Dropped....", dateTime);
+					Console.WriteLine("({0}) <Web Interface> Connection Dropped....", DateTime.Now.ToString("hh:mm"));
 				}
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("({0}) <Web Interface> Error Occurred : {1}", dateTime, e);
+				Console.WriteLine("({0}) <Web Interface> Error Occurred : {1}", DateTime.Now.ToString("hh:mm"), e);
 			}
 		}
 	}

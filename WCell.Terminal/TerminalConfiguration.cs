@@ -15,23 +15,18 @@ namespace WCell.Terminal
 	[XmlRoot("WCellConfig")]
 	public class TerminalConfiguration : WCellConfig<TerminalConfiguration>
 	{
-		#region Terminal Config
-		public static Boolean AutoStartAuthServer = true;
-		public static Boolean AutoStartRealmServer = true;
-		public static String AuthServerPath = Path.Combine(Directory.GetCurrentDirectory(), "WCell.AuthServerConsole.exe");
-		public static String RealmServerPath = Path.Combine(Directory.GetCurrentDirectory(), "WCell.RealmServerConsole.exe");
-		public static String DefaultServer = "euroserv.fr.quakenet.org";
-		public static int DefaultPort = 6667;
-		public static String DefaultNick = "Sylvanas";
-		public static String AlternateNick1 = "Sylvanas2";
-		public static String AlternateNick2 = "Sylvanas3";
-		public static String DefaultUserName = "Sylvanas@dekadence.ro";
-		public static String DefaultInfo = "Sylvanas Windrunner";
+		#region Terminal Default Config
+		public static int ConsoleWidth = 80;
+		public static int ConsoleHeight = 25;
+		public static bool ConsoleCenterOnScreen = true;
+		public static bool AutoStartAuthServer = true;
+		public static bool AutoStartRealmServer = true;
+		public static string AuthServerPath = Path.Combine(Directory.GetCurrentDirectory(), "WCell.AuthServerConsole.exe");
+		public static string RealmServerPath = Path.Combine(Directory.GetCurrentDirectory(), "WCell.RealmServerConsole.exe");
 		#endregion
 
 		private static bool init;
 		private const string ConfigFilename = "Config.xml";
-		private static string dateTime;
 
 		private static TerminalConfiguration s_instance;
 		public static TerminalConfiguration Instance
@@ -39,20 +34,17 @@ namespace WCell.Terminal
 			get { return s_instance; }
 		}
 
-		protected TerminalConfiguration()
-			: base(OnError)
+		protected TerminalConfiguration() : base(OnError)
 		{
 			RootNodeName = "WCellConfig";
 			s_instance = this;
 		}
 
-		public TerminalConfiguration(string executablePath)
-			: this()
+		public TerminalConfiguration(string executablePath)	: this()
 		{
 			RootNodeName = "WCellConfig";
 			s_instance = this;
-			dateTime = DateTime.Now.ToString("hh:mm");
-			Console.WriteLine("({0}) <Config> Initializing...", dateTime);
+			Console.WriteLine("({0}) <Config> Initializing...", DateTime.Now.ToString("hh:mm"));
 			Initialize();
 		}
 
@@ -70,7 +62,7 @@ namespace WCell.Terminal
 
 		public static bool Initialize()
 		{
-			Console.WriteLine("({0}) <Config> Initialized...", dateTime);
+			Console.WriteLine("({0}) <Config> Initialized...", DateTime.Now.ToString("hh:mm"));
 			if (!init)
 			{
 				init = true;
@@ -81,9 +73,9 @@ namespace WCell.Terminal
 					if (!s_instance.Load())
 					{
 						s_instance.Save(true, false);
-						Console.WriteLine("({0}) <Config> Config-file \"{1}\" not found - Created new file.", dateTime, Instance.Filename);
-						Console.WriteLine("({0}) <Config> Please take a little time to configure your server and then restart the Application.", dateTime);
-						Console.WriteLine("({0}) <Config> See http://wiki.wcell.org/index.php/Configuration for more information.", dateTime);
+						Console.WriteLine("({0}) <Config> Config-file \"{1}\" not found - Created new file.", DateTime.Now.ToString("hh:mm"), Instance.Filename);
+						Console.WriteLine("({0}) <Config> Please take a little time to configure your server and then restart the Application.", DateTime.Now.ToString("hh:mm"));
+						Console.WriteLine("({0}) <Config> See http://wiki.wcell.org/index.php/Configuration for more information.", DateTime.Now.ToString("hh:mm"));
 						return false;
 					}
 					else
@@ -96,7 +88,7 @@ namespace WCell.Terminal
 				}
 				catch (Exception e)
 				{
-					Console.WriteLine("({0}) <Config> {1}", dateTime, e.ToString());
+					Console.WriteLine("({0}) <Config> {1}", DateTime.Now.ToString("hh:mm"), e.ToString());
 					return false;
 				}
 			}
@@ -105,12 +97,12 @@ namespace WCell.Terminal
 
 		internal static void OnError(string msg)
 		{
-			Console.WriteLine("({0}) <Config> {1}", dateTime, msg);
+			Console.WriteLine("({0}) <Config> {1}", DateTime.Now.ToString("hh:mm"), msg);
 		}
 
 		internal static void OnError(string msg, params object[] args)
 		{
-			Console.WriteLine("({0}) <Config> {1}", dateTime, String.Format(msg, args));
+			Console.WriteLine("({0}) <Config> {1}", DateTime.Now.ToString("hh:mm"), String.Format(msg, args));
 		}
 	}
 }

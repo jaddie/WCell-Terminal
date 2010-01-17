@@ -5,7 +5,7 @@ using System.Text;
 using System.Reflection;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Runtime.InteropServices;
+using WCell.Util;
 
 namespace WCell.Terminal
 {
@@ -28,41 +28,13 @@ namespace WCell.Terminal
 			notifyIcon.Dispose();
 		}
 
-		private bool ConsoleVisible = true;
-
-		[DllImport("user32.dll")]
-		public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
-
-		[DllImport("user32.dll")]
-		static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
-		[DllImport("user32.dll")]
-		private static extern bool SetForegroundWindow(IntPtr hWnd);
-
-		private void setConsoleWindowVisibility(bool visible, string title)
-		{
-			IntPtr hWnd = FindWindow(null, title);
-			if (hWnd != IntPtr.Zero)
-			{
-				if (!visible)
-				{
-					ShowWindow(hWnd, 0);
-				}
-				else
-				{
-					ShowWindow(hWnd, 1);
-					SetForegroundWindow(hWnd);
-				}
-			}
-		}
-
 		private void OnMouseClick(object sender, MouseEventArgs e)
 		{
 			switch (e.Button)
 			{
 				case MouseButtons.Left:
-					ConsoleVisible = !ConsoleVisible;
-					setConsoleWindowVisibility(ConsoleVisible, Console.Title);
+					ConsoleUtil.ConsoleVisible = !ConsoleUtil.ConsoleVisible;
+					ConsoleUtil.SetConsoleWindowVisibility(ConsoleUtil.ConsoleVisible);
 					break;
 				case MouseButtons.Right:
 					break;
@@ -77,7 +49,9 @@ namespace WCell.Terminal
 		{
 			Assembly a = Assembly.GetExecutingAssembly();
 			Icon icon = new Icon(a.GetManifestResourceStream(WCellTerminalIcon));
+			ConsoleUtil.SetConsoleIcon(icon);
 			notifyIcon.Icon = icon;
+			notifyIcon.Text = Console.Title;
 			menu.MenuItems.Add("&Say hello world");
 			menu.MenuItems.Add("-");
 			menu.MenuItems.Add("&Close");
