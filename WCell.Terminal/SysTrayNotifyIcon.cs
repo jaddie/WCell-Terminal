@@ -49,7 +49,6 @@ namespace WCell.Terminal
 		{
 			Assembly a = Assembly.GetExecutingAssembly();
 			Icon icon = new Icon(a.GetManifestResourceStream(WCellTerminalIcon));
-			ConsoleUtil.SetConsoleIcon(icon);
 			notifyIcon.Icon = icon;
 			notifyIcon.Text = Console.Title;
 			menu.MenuItems.Add("&Say hello world");

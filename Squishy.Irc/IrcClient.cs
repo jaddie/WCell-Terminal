@@ -117,6 +117,10 @@ namespace Squishy.Irc
 			}
 		}
 
+		/// <summary>
+		/// The maximal length of the nick depends on the network and will usually be set during login.
+		/// </summary>
+		/// <exception cref="InvalidOperationException">If the length of your nick exceeds this value.</exception>
 		public int MaxNickLen
 		{
 			get { return m_MaxNickLen; }
@@ -979,9 +983,11 @@ namespace Squishy.Irc
 
 		internal void InvalidNickNotify(string err, string nick, string args)
 		{
-			// handle automatic change of nicks when logging in
-			if (!m_loggedIn && m_nickIndex++ < m_nicks.Length)
-				CommandHandler.Nick(m_nicks[m_nickIndex]);
+			if (!m_loggedIn)
+			{
+				// handle automatic change of nicks when logging in
+				CommandHandler.Nick(m_nicks[++m_nickIndex % m_nicks.Length]);
+			}
 			OnInvalidNick(err, nick, args);
 		}
 

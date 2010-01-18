@@ -5,6 +5,10 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Windows.Forms;
+using System.IO;
+using System.Reflection;
+using System.Diagnostics;
+using Microsoft.Win32;
 
 namespace WCell.Util
 {
@@ -12,14 +16,11 @@ namespace WCell.Util
 	{
 		public static bool ConsoleVisible = true;
 
-		public const int WM_SETICON = 0x80;
-		public const int ICON_SMALL = 0;
-		public const int ICON_BIG = 1;
+		public const int WM_FONTCHANGE = 0x001D;
+		public const int HWND_BROADCAST = 0xffff;
 		public const int STD_INPUT_HANDLE = -10;
 		public const int STD_OUTPUT_HANDLE = -11;
 		public const int STD_ERROR_HANDLE = -12;
-		public const int CONSOLE_FULLSCREEN_MODE = 1;
-		public const int CONSOLE_WINDOWED_MODE = 2;
 
 		[StructLayout(LayoutKind.Sequential)]
 		public struct COORD
@@ -36,6 +37,18 @@ namespace WCell.Util
 		}
 
 		[DllImport("kernel32")]
+		public static extern int WriteProfileString(string lpszSection, string lpszKeyName, string lpszString);
+
+		[DllImport("kernel32")]
+		public static extern bool SetConsoleIcon(IntPtr hIcon);
+
+		[DllImport("kernel32")]
+		public static extern bool AllocConsole();
+
+		[DllImport("kernel32")]
+		public static extern bool FreeConsole();
+
+		[DllImport("kernel32")]
 		public static extern IntPtr GetConsoleWindow();
 
 		[DllImport("kernel32")]
@@ -43,6 +56,12 @@ namespace WCell.Util
 
 		[DllImport("kernel32")]
 		public static extern bool GetCurrentConsoleFont(IntPtr hConsoleOutput, bool bMaximumWindow, out CONSOLE_FONT_INFO lpConsoleCurrentFont);
+
+		[DllImport("kernel32")]
+		public static extern bool SetConsoleFont(IntPtr hConsoleOutput, int fontIndex);
+
+		[DllImport("gdi32")]
+		public static extern int AddFontResource(string lpFileName);
 
 		[DllImport("user32")]
 		public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
@@ -58,9 +77,7 @@ namespace WCell.Util
 
 		public static void SetConsoleIcon(Icon icon)
 		{
-			IntPtr hWnd = GetConsoleWindow();
-			SendMessage(hWnd, WM_SETICON, ICON_SMALL, icon.Handle);
-			SendMessage(hWnd, WM_SETICON, ICON_BIG, icon.Handle);
+			SetConsoleIcon(icon.Handle);
 		}
 
 		public static COORD GetConsoleFontSize()
@@ -80,6 +97,53 @@ namespace WCell.Util
 			FontSize.X = 0;
 			FontSize.Y = 0;
 			return FontSize;
+		}
+
+		public static void ApplyFont(string FontName)
+		{
+			RegistryKey defaultKey = Registry.CurrentUser.CreateSubKey(@"Console");
+			defaultKey.SetValue("FaceName", FontName);
+			defaultKey.Close();
+		}
+
+		public static void InstallFont(string FontType ,string FontName, string FontFileName)
+		{
+			SendMessage((IntPtr)HWND_BROADCAST, WM_FONTCHANGE, 0, IntPtr.Zero);
+			string FontPath = Path.Combine(Directory.GetCurrentDirectory(), @"Resources\" + FontFileName);
+			AddFontResource(FontPath);
+			WriteProfileString("fonts", FontName + " " + FontType, FontPath);
+		}
+
+		public static void ApplyCustomFont()
+		{
+			ApplyFont("LerosC");
+		}
+
+		public static void InstallCustomFontAndApply()
+		{
+			InstallFont("(All Res)", "LerosC", "LerosC.fon");
+			for (var i = 0; i <= 9; i++)
+			{
+				SetConsoleFont(i);
+				COORD FontSize = GetConsoleFontSize();
+				if (FontSize.X == 6 && FontSize.Y == 11)
+				{
+					break;
+				}
+				else if (FontSize.X == 8 && FontSize.Y == 12)
+				{
+					break;
+				}
+			}
+		}
+
+		public static void SetConsoleFont(int font)
+		{
+			IntPtr hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+			if (hConsoleOutput != IntPtr.Zero)
+			{
+				SetConsoleFont(hConsoleOutput, font);
+			}
 		}
 
 		public static void CenterConsoleWindow(int Width, int Height)

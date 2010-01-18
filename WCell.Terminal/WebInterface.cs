@@ -19,15 +19,19 @@ namespace WCell.Terminal
 		public WebInterface()
 		{
 			if (Enabled)
-			{				
+			{
 				try
 				{
-					myListener = new TcpListener( IPAddress.Parse(ListenAddress), Port);
+					myListener = new TcpListener(IPAddress.Parse(ListenAddress), Port);
 					myListener.Start();
 					Console.WriteLine("({0}) <Web Interface> Running on Port {1}...", DateTime.Now.ToString("hh:mm"), Port);
 
 					Thread th = new Thread(new ThreadStart(StartListen));
 					th.Start();
+				}
+				catch (SocketException e)
+				{
+					Console.WriteLine("({0}) <Web Interface> An Exception Occurred while Listening: {1}", DateTime.Now.ToString("hh:mm"), e.ToString());
 				}
 				catch (Exception e)
 				{

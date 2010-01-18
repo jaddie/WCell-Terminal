@@ -6,6 +6,8 @@ using System.Windows.Forms;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.IO;
+using System.Drawing;
+using Microsoft.Win32;
 using WCell.Util;
 
 namespace WCell.Terminal
@@ -48,41 +50,32 @@ namespace WCell.Terminal
 
 		public TerminalMain()
 		{
-			WCell.Util.AppUtil.AddApplicationExitHandler(ConsoleEventHandler);
-			Version vrs = new Version(Application.ProductVersion);
-			try
-			{
-				String ExePath = Directory.GetCurrentDirectory();
-				String SourcePath = Directory.GetParent(Directory.GetParent(ExePath).FullName).FullName;
-				int Revision = WCell.Util.SvnUtil.GetVersionNumber(SourcePath);
-				Console.Title = String.Format("WCell.Terminal v{0}.{1} rev {2}", vrs.Major, vrs.Minor, Revision);
-			}
-			catch (DirectoryNotFoundException)
-			{
-				Console.Title = String.Format("WCell.Terminal v{0}.{1} rev unknown", vrs.Major, vrs.Minor);
-			}
-			Console.ForegroundColor = ConsoleColor.White;
 			notification = new SysTrayNotifyIcon();
 			notification.Visible = true;
-
 			m_configuration = new TerminalConfiguration(EntryLocation);
 
 			if (TerminalConfiguration.ConsoleCenterOnScreen)
 			{
 				ConsoleUtil.CenterConsoleWindow(TerminalConfiguration.ConsoleWidth, TerminalConfiguration.ConsoleHeight);
 			}
-			
-			if (TerminalConfiguration.ConsoleWidth != 80)
-			{
-				Console.BufferWidth = TerminalConfiguration.ConsoleWidth;
-				Console.WindowWidth = TerminalConfiguration.ConsoleWidth;
-			}
 
-			if (TerminalConfiguration.ConsoleHeight != 25)
+			try
 			{
+				Console.WindowWidth = TerminalConfiguration.ConsoleWidth;
 				Console.WindowHeight = TerminalConfiguration.ConsoleHeight;
-			}			
-			Console.BufferHeight = Int16.MaxValue - 1;
+				Console.BufferWidth = TerminalConfiguration.ConsoleWidth;
+				Console.BufferHeight = Int16.MaxValue - 1;
+			}
+			catch (ArgumentOutOfRangeException)
+			{
+				Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine("({0}) <Terminal> Failed to initialize properly. Check Console settings.", DateTime.Now.ToString("hh:mm"));
+				Console.ResetColor();
+			}
+			finally
+			{
+				Console.WriteLine("({0}) <Terminal> Initialized...", DateTime.Now.ToString("hh:mm"));
+			}
 
 			var connection = new IRCInterface
 			{
@@ -90,6 +83,7 @@ namespace WCell.Terminal
 				UserName = IRCInterface.DefaultUserName,
 				Info = IRCInterface.DefaultInfo
 			};
+
 			if (IRCInterface.IRCEnabled)
 			{
 				connection.BeginConnect(IRCInterface.DefaultServer, IRCInterface.DefaultPort);
@@ -118,6 +112,10 @@ namespace WCell.Terminal
 					{
 						Console.ForegroundColor = ConsoleColor.Gray;
 					}
+					else if (ex.Data.Contains("Unhandled Exception"))
+					{
+						Console.ForegroundColor = ConsoleColor.DarkRed;
+					}
 					else
 					{
 						Console.ForegroundColor = ConsoleColor.White;
@@ -145,6 +143,10 @@ namespace WCell.Terminal
 					{
 						Console.ForegroundColor = ConsoleColor.Gray;
 					}
+					else if (ex.Data.Contains("Unhandled Exception"))
+					{
+						Console.ForegroundColor = ConsoleColor.DarkRed;
+					}
 					else
 					{
 						Console.ForegroundColor = ConsoleColor.White;
@@ -158,7 +160,32 @@ namespace WCell.Terminal
 
 		static void Main(string[] args)
 		{
-			Application.Run(new TerminalMain());
+			ConsoleUtil.ApplyCustomFont();
+			ConsoleUtil.AllocConsole();
+			ConsoleUtil.InstallCustomFontAndApply();
+			Assembly a = Assembly.GetExecutingAssembly();
+			Icon icon = new Icon(a.GetManifestResourceStream("WCell.Terminal.Resources.WCell.Terminal.ico"));
+			ConsoleUtil.SetConsoleIcon(icon);
+			AppUtil.AddApplicationExitHandler(ConsoleEventHandler);
+			Console.ForegroundColor = ConsoleColor.White;
+			Console.WriteLine("({0}) <Terminal> Initializing...", DateTime.Now.ToString("hh:mm"));
+			Version vrs = new Version(Application.ProductVersion);
+			try
+			{
+				String ExePath = Directory.GetCurrentDirectory();
+				String SourcePath = Directory.GetParent(Directory.GetParent(ExePath).FullName).FullName;
+				int Revision = WCell.Util.SvnUtil.GetVersionNumber(SourcePath);
+				Console.Title = String.Format("WCell.Terminal v{0}.{1} rev {2}", vrs.Major, vrs.Minor, Revision);
+			}
+			catch (DirectoryNotFoundException)
+			{
+				Console.Title = String.Format("WCell.Terminal v{0}.{1} rev unknown", vrs.Major, vrs.Minor);
+			}
+			catch (NullReferenceException)
+			{
+				Console.Title = String.Format("WCell.Terminal v{0}.{1} rev unknown", vrs.Major, vrs.Minor);
+			}			
+			Application.Run(new TerminalMain());			
 		}
 	}
 }
