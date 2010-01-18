@@ -15,6 +15,8 @@ namespace WCell.Terminal
 	class TerminalMain : ApplicationContext
 	{
 		public static SysTrayNotifyIcon notification;
+		public static ProcessRunner AuthServer;
+		public static ProcessRunner RealmServer;
 
 		#region Config
 		private static TerminalConfiguration m_configuration;
@@ -58,6 +60,10 @@ namespace WCell.Terminal
 			{
 				ConsoleUtil.CenterConsoleWindow(TerminalConfiguration.ConsoleWidth, TerminalConfiguration.ConsoleHeight);
 			}
+			else
+			{
+				ConsoleUtil.PositionConsoleWindow(TerminalConfiguration.ConsoleLeft, TerminalConfiguration.ConsoleTop, TerminalConfiguration.ConsoleWidth, TerminalConfiguration.ConsoleHeight);
+			}
 
 			try
 			{
@@ -69,7 +75,7 @@ namespace WCell.Terminal
 			catch (ArgumentOutOfRangeException)
 			{
 				Console.ForegroundColor = ConsoleColor.Red;
-				Console.WriteLine("({0}) <Terminal> Failed to initialize properly. Check Console settings.", DateTime.Now.ToString("hh:mm"));
+				Console.WriteLine("({0}) <Terminal> Failed to initialize properly. Check Config.xml settings.", DateTime.Now.ToString("hh:mm"));
 				Console.ResetColor();
 			}
 			finally
@@ -97,64 +103,98 @@ namespace WCell.Terminal
 
 			if (TerminalConfiguration.AutoStartAuthServer)
 			{
-				ProcessRunner AuthServer = new ProcessRunner(TerminalConfiguration.AuthServerPath);
-				ProcessOutputEventHandler AuthServerOutputHandler = delegate(object o, ProcessOutputEventArgs ex)
+				try
 				{
-					if (ex.Data.Contains("[Error]"))
+					AuthServer = new ProcessRunner(TerminalConfiguration.AuthServerPath);
+				}
+				catch (FileNotFoundException)
+				{
+					Console.WriteLine("({0}) <Terminal> Failed to start AuthServer. Check Config.xml settings.", DateTime.Now.ToString("hh:mm"));
+				}
+				finally
+				{
+					ProcessOutputEventHandler AuthServerOutputHandler = delegate(object o, ProcessOutputEventArgs ex)
 					{
-						Console.ForegroundColor = ConsoleColor.Red;
-					}
-					else if (ex.Data.Contains("[Warn]"))
+						if (ex.Data.Contains("[Error]"))
+						{
+							Console.ForegroundColor = ConsoleColor.Red;
+						}
+						else if (ex.Data.Contains("[Warn]"))
+						{
+							Console.ForegroundColor = ConsoleColor.Yellow;
+						}
+						else if (ex.Data.Contains("[Debug]"))
+						{
+							Console.ForegroundColor = ConsoleColor.Gray;
+						}
+						else if (ex.Data.Contains("Unhandled Exception"))
+						{
+							Console.ForegroundColor = ConsoleColor.DarkRed;
+						}
+						else
+						{
+							Console.ForegroundColor = ConsoleColor.White;
+						}
+						Console.WriteLine("({0}) <AuthServer> {1}", DateTime.Now.ToString("hh:mm"), ex.Data);
+					};
+					try
 					{
-						Console.ForegroundColor = ConsoleColor.Yellow;
+						AuthServer.OutputReceived += AuthServerOutputHandler;
+						AuthServer.Start();
 					}
-					else if (ex.Data.Contains("[Debug]"))
+					catch (NullReferenceException)
 					{
-						Console.ForegroundColor = ConsoleColor.Gray;
+						Console.WriteLine("({0}) <Terminal> Failed to start AuthServer. Check Config.xml settings.", DateTime.Now.ToString("hh:mm"));
 					}
-					else if (ex.Data.Contains("Unhandled Exception"))
-					{
-						Console.ForegroundColor = ConsoleColor.DarkRed;
-					}
-					else
-					{
-						Console.ForegroundColor = ConsoleColor.White;
-					}
-					Console.WriteLine("({0}) <AuthServer> {1}", DateTime.Now.ToString("hh:mm"), ex.Data);
-				};
-				AuthServer.OutputReceived += AuthServerOutputHandler;
-				AuthServer.Start();
+				}
 			}
 
 			if (TerminalConfiguration.AutoStartRealmServer)
 			{
-				ProcessRunner RealmServer = new ProcessRunner(TerminalConfiguration.RealmServerPath);
-				ProcessOutputEventHandler RealmServerOutputHandler = delegate(object o, ProcessOutputEventArgs ex)
+				try
 				{
-					if (ex.Data.Contains("[Error]"))
+					RealmServer = new ProcessRunner(TerminalConfiguration.RealmServerPath);
+				}
+				catch (FileNotFoundException)
+				{
+					Console.WriteLine("({0}) <Terminal> Failed to start RealmServer. Check Config.xml settings.", DateTime.Now.ToString("hh:mm"));
+				}
+				finally
+				{
+					ProcessOutputEventHandler RealmServerOutputHandler = delegate(object o, ProcessOutputEventArgs ex)
 					{
-						Console.ForegroundColor = ConsoleColor.Red;
-					}
-					else if (ex.Data.Contains("[Warn]"))
+						if (ex.Data.Contains("[Error]"))
+						{
+							Console.ForegroundColor = ConsoleColor.Red;
+						}
+						else if (ex.Data.Contains("[Warn]"))
+						{
+							Console.ForegroundColor = ConsoleColor.Yellow;
+						}
+						else if (ex.Data.Contains("[Debug]"))
+						{
+							Console.ForegroundColor = ConsoleColor.Gray;
+						}
+						else if (ex.Data.Contains("Unhandled Exception"))
+						{
+							Console.ForegroundColor = ConsoleColor.DarkRed;
+						}
+						else
+						{
+							Console.ForegroundColor = ConsoleColor.White;
+						}
+						Console.WriteLine("({0}) <RealmServer> {1}", DateTime.Now.ToString("hh:mm"), ex.Data);
+					};
+					try
 					{
-						Console.ForegroundColor = ConsoleColor.Yellow;
+						RealmServer.OutputReceived += RealmServerOutputHandler;
+						RealmServer.Start();
 					}
-					else if (ex.Data.Contains("[Debug]"))
+					catch (NullReferenceException)
 					{
-						Console.ForegroundColor = ConsoleColor.Gray;
+						Console.WriteLine("({0}) <Terminal> Failed to start RealmServer. Check Config.xml settings.", DateTime.Now.ToString("hh:mm"));
 					}
-					else if (ex.Data.Contains("Unhandled Exception"))
-					{
-						Console.ForegroundColor = ConsoleColor.DarkRed;
-					}
-					else
-					{
-						Console.ForegroundColor = ConsoleColor.White;
-					}
-					Console.WriteLine("({0}) <RealmServer> {1}", DateTime.Now.ToString("hh:mm"), ex.Data);
-				};
-				RealmServer.OutputReceived += RealmServerOutputHandler;
-				RealmServer.Start();
+				}
 			}
 		}
 

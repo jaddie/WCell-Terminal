@@ -16,6 +16,8 @@ namespace WCell.Terminal
 	public class TerminalConfiguration : WCellConfig<TerminalConfiguration>
 	{
 		#region Terminal Default Config
+		public static int ConsoleLeft = 0;
+		public static int ConsoleTop = 0;
 		public static int ConsoleWidth = 80;
 		public static int ConsoleHeight = 25;
 		public static bool ConsoleCenterOnScreen = true;

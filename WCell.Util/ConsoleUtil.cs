@@ -146,6 +146,19 @@ namespace WCell.Util
 			}
 		}
 
+		public static void PositionConsoleWindow(int Left, int Top, int Width, int Height)
+		{
+			COORD FontSize = GetConsoleFontSize();
+			if (FontSize.X > 0 && FontSize.Y > 0)
+			{
+				IntPtr hWnd = GetConsoleWindow();
+				if (hWnd != IntPtr.Zero)
+				{
+					MoveWindow(hWnd, Left, Top, Width * FontSize.X, Height * FontSize.Y, true);
+				}
+			}
+		}
+
 		public static void CenterConsoleWindow(int Width, int Height)
 		{
 			Screen scr = Screen.PrimaryScreen;
