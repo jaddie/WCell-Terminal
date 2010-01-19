@@ -1,0 +1,41 @@
+body {
+	background-color: black;
+	background-attachment: fixed;
+	background-image: url('../images/wcell_logo_big.png');
+	background-repeat: no-repeat;
+	background-position: 150px 0px;
+	margin: 0px;
+	padding: 0px;
+}
+pre {
+	color: white;
+	font-family: monospace;
+	font-size: 1em;
+}
+.content {
+	width: 100%;
+	text-align: center;
+	margin-top: 150px;
+}
+.container {
+	background-image: url('../images/container.png');
+	background-repeat: no-repeat;
+	width: 850px;
+	height: 645px;
+	margin: 0px auto;
+}
+.console {
+	width: 800px;
+	height: 600px;
+	font-size: 0.7em;
+	color: lime;
+	text-align: left;
+	overflow: auto;
+	margin: 0px auto;
+	padding-top: 20px;
+	white-space: pre-wrap;
+	white-space: -moz-pre-wrap;
+	white-space: -pre-wrap;
+	white-space: -o-pre-wrap;
+	word-wrap: break-word;
+}

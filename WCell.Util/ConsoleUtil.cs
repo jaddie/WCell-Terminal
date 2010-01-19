@@ -101,9 +101,12 @@ namespace WCell.Util
 
 		public static void ApplyFont(string FontName)
 		{
-			RegistryKey defaultKey = Registry.CurrentUser.CreateSubKey(@"Console");
+			RegistryKey defaultKey = Registry.CurrentUser.CreateSubKey("Console");
 			defaultKey.SetValue("FaceName", FontName);
 			defaultKey.Close();
+			RegistryKey masterKey = Registry.CurrentUser.CreateSubKey(@"Console\" + Application.ExecutablePath.Replace(@"\","_"));
+			masterKey.SetValue("FaceName", FontName);
+			masterKey.Close();
 		}
 
 		public static void InstallFont(string FontType ,string FontName, string FontFileName)

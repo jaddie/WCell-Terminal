@@ -13,8 +13,8 @@ namespace WCell.Terminal
 {
 	public class IRCInterface : IrcClient
 	{
-		#region Terminal IRC Interface Default Config
-		public static bool IRCEnabled = true;
+		#region IRC Interface Default Config
+		public static bool IRCInterfaceEnabled = true;
 		public static bool HideChatting = false;
 		public static bool HideIncomingIrcPackets = false;
 		public static bool HideOutgoingIrcPackets = false;

@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.IO;
 using System.Drawing;
+using System.Diagnostics;
 using Microsoft.Win32;
 using WCell.Util;
 
@@ -24,25 +25,6 @@ namespace WCell.Terminal
 		{
 			get { return m_configuration; }
 		}
-
-		private static string s_entryLocation;
-
-		private static string EntryLocation
-		{
-			get
-			{
-				if (s_entryLocation == null)
-				{
-					var asm = Assembly.GetEntryAssembly();
-					if (asm != null)
-					{
-						s_entryLocation = asm.Location;
-					}
-				}
-				return s_entryLocation;
-			}
-			set { s_entryLocation = value; }
-		}
 		#endregion
 
 		static void ConsoleEventHandler()
@@ -54,7 +36,7 @@ namespace WCell.Terminal
 		{
 			notification = new SysTrayNotifyIcon();
 			notification.Visible = true;
-			m_configuration = new TerminalConfiguration(EntryLocation);
+			m_configuration = new TerminalConfiguration(Application.ExecutablePath);
 
 			if (TerminalConfiguration.ConsoleCenterOnScreen)
 			{
@@ -90,7 +72,7 @@ namespace WCell.Terminal
 				Info = IRCInterface.DefaultInfo
 			};
 
-			if (IRCInterface.IRCEnabled)
+			if (IRCInterface.IRCInterfaceEnabled)
 			{
 				connection.BeginConnect(IRCInterface.DefaultServer, IRCInterface.DefaultPort);
 			}
