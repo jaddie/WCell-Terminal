@@ -68,8 +68,8 @@ namespace WCell.Terminal
 			{
 				_server = new HttpServer.HttpServer();
 				_server.ServerName = "WCell.Terminal WebInterface Embedded WebServer";
-				DigestAuthentication auth = new DigestAuthentication(OnAuthenticate, OnAuthenticationRequired);
-				_server.AuthenticationModules.Add(auth);
+				//DigestAuthentication auth = new DigestAuthentication(OnAuthenticate, OnAuthenticationRequired);
+				//_server.AuthenticationModules.Add(auth);
 				_server.ExceptionThrown += OnException;
 				FileModule _module = new FileModule(@"/", Path.Combine(Directory.GetCurrentDirectory(), "WebInterface"));
 				foreach (var mimetype in AllowedMimeTypes)

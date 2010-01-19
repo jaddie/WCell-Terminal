@@ -1,3 +1,8 @@
-.console {
-	font-size: 0.7em;
+#console {
+	font-size: 0.8em;
+}
+pre {
+	width: 98%;
+	height: 50%;
+	white-space: inherit;
 }

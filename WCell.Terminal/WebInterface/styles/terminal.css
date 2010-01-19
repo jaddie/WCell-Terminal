@@ -1,38 +1,24 @@
 body {
-	background-color: black;
-	background-attachment: fixed;
-	background-image: url('../images/wcell_logo_big.png');
-	background-repeat: no-repeat;
-	background-position: 150px 0px;
+	background: #deedf7 url('../styles/themes/cupertino/images/ui-bg_highlight-soft_100_deedf7_1x100.png') repeat-x scroll 50% top;
 	margin: 0px;
 	padding: 0px;
 }
-pre {
-	color: white;
-	font-family: monospace;
-	font-size: 1em;
-}
-.content {
-	width: 100%;
-	text-align: center;
-	margin-top: 150px;
-}
-.container {
-	background-image: url('../images/container.png');
+#logo {
+	width: 400px;
+	height: 353px;
+	background-image: url('../images/wcell_logo.png');
 	background-repeat: no-repeat;
-	width: 850px;
-	height: 645px;
-	margin: 0px auto;
 }
-.console {
+#console {
 	width: 800px;
-	height: 600px;
-	font-size: 0.7em;
-	color: lime;
+	height: 500px;
+}
+pre {
+	font-family: monospace;
+	font-size: 0.8em;
+	color: black;
 	text-align: left;
 	overflow: auto;
-	margin: 0px auto;
-	padding-top: 20px;
 	white-space: pre-wrap;
 	white-space: -moz-pre-wrap;
 	white-space: -pre-wrap;
