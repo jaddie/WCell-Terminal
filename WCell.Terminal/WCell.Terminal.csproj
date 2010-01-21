@@ -71,25 +71,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ArgumentList.cs" />
-    <Compile Include="Check.cs" />
-    <Compile Include="ManagedFileModule.cs" />
+    <Compile Include="Interfaces\WebInterface\PHPModule.cs" />
+    <Compile Include="Utils\ArgumentList.cs" />
+    <Compile Include="Utils\Check.cs" />
+    <Compile Include="Interfaces\WebInterface\ManagedFileModule.cs" />
     <Compile Include="SysTrayNotifyIcon.cs" />
-    <Compile Include="TerminalConfiguration.cs" />
-    <Compile Include="WCellConfig.cs" />
-    <Compile Include="ProcessOutputEventArgs.cs" />
-    <Compile Include="ProcessRunner.cs" />
+    <Compile Include="Config\TerminalConfiguration.cs" />
+    <Compile Include="Config\WCellConfig.cs" />
+    <Compile Include="Utils\Process\ProcessOutputEventArgs.cs" />
+    <Compile Include="Utils\Process\ProcessRunner.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="IRCInterface.cs" />
+    <Compile Include="Interfaces\IRCInterface\IRCInterface.cs" />
     <Compile Include="TerminalMain.cs" />
-    <Compile Include="WCellVariableDefinition.cs" />
-    <Compile Include="Utils.cs" />
-    <Compile Include="WebInterface.cs" />
+    <Compile Include="Config\WCellVariableDefinition.cs" />
+    <Compile Include="Utils\Utils.cs" />
+    <Compile Include="Interfaces\WebInterface\WebInterface.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Squishy.Irc\Squishy.Irc.csproj">

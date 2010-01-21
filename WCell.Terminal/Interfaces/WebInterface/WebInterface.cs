@@ -32,12 +32,15 @@ namespace WCell.Terminal
 
 		private HttpServer.HttpServer _server;
 		private X509Certificate2 _cert;
+		private string[] AuthedUsers;
 
 		public static bool WebInterfaceEnabled = true;
+		public static bool WebInterfaceDebug = false;
 		public static string ListenAddress = IPAddress.Any.ToString();
-		public static bool UseSSL = false;
-		public static string CertificatePath = Path.Combine(Directory.GetCurrentDirectory(), "certificate.cer");
 		public static int Port = 8080;
+		public static bool UseSSL = false;
+		public static bool UseDigestAuth = false;
+		public static string CertificatePath = Path.Combine(Directory.GetCurrentDirectory(), "certificate.cer");		
 		public static string Username = "Admin";
 		public static string Password = "passw0rd";
 		public static string[] AllowedMimeTypes = {
@@ -67,9 +70,16 @@ namespace WCell.Terminal
 			if (WebInterfaceEnabled)
 			{
 				_server = new HttpServer.HttpServer();
-				_server.ServerName = "WCell.Terminal WebInterface Embedded WebServer";
-				//DigestAuthentication auth = new DigestAuthentication(OnAuthenticate, OnAuthenticationRequired);
-				//_server.AuthenticationModules.Add(auth);
+				if (WebInterfaceDebug)
+				{
+					_server.LogWriter = new ConsoleLogWriter();
+				}
+				_server.ServerName = "WCell.Terminal";
+				if (UseDigestAuth)
+				{
+					DigestAuthentication auth = new DigestAuthentication(OnAuthenticate, OnAuthenticationRequired);
+					_server.AuthenticationModules.Add(auth);
+				}
 				_server.ExceptionThrown += OnException;
 				ManagedFileModule _module = new ManagedFileModule(@"/", Path.Combine(Directory.GetCurrentDirectory(), "WebInterface"));
 				_module.MimeTypes.Add("default", "application/octet-stream");
@@ -184,6 +194,46 @@ namespace WCell.Terminal
 			Console.WriteLine("({0}) <Web Interface> {1}", DateTime.Now.ToString("hh:mm"), e);
 		}
 
+		private bool OnAuthenticationRequired(IHttpRequest request)
+		{
+			for (var i = 0; i < request.Headers.Count; i++)
+			{
+				string Header = request.Headers.Get(i);
+				if (Header.StartsWith("Digest"))
+				{
+					string[] Values = Header.Replace("Digest ", String.Empty).Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+					foreach (var val in Values)
+					{
+						if (val.StartsWith("username"))
+						{
+							string[] Parse = val.Split(new char[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
+							if (Parse.Length != 0)
+							{
+								string Username = Parse[1].Replace("\"", String.Empty);
+								try
+								{
+									foreach (var user in AuthedUsers)
+									{
+										Console.WriteLine("OnAuthenticationRequired {0}", user);
+										if (Username == user)
+										{
+											return false;
+										}
+									}
+								}
+								catch (NullReferenceException e)
+								{
+									Console.WriteLine("OnAuthenticationRequired {0}", e);
+								}
+							}
+						}
+					}
+				}
+			}
+			Console.WriteLine("OnAuthenticationRequired /");
+			return request.Uri.AbsolutePath.StartsWith("/");
+		}
+
 		/// <summary>
 		/// Delegate used to let authentication modules authenticate the user name and password.
 		/// </summary>
@@ -192,17 +242,18 @@ namespace WCell.Terminal
 		/// <param name="password">Password supplied by the delegate</param>
 		/// <param name="login">object that will be stored in a session variable called <see cref="AuthenticationModule.AuthenticationTag"/> if authentication was successful.</param>
 		/// <exception cref="ForbiddenException">throw forbidden exception if too many attempts have been made.</exception>
-		private bool OnAuthenticationRequired(IHttpRequest request)
-		{
-			return request.Uri.AbsolutePath.StartsWith("/");
-		}
-
 		private void OnAuthenticate(string realm, string userName, ref string password, out object login)
 		{
 			if (userName == Username)
 			{
 				password = Password;
 				login = new User(1, Username);
+				AuthedUsers = new string[] { Username };
+				//login = Session[AuthenticationModule.AuthenticationTag];
+				foreach (var user in AuthedUsers)
+				{
+					Console.WriteLine("OnAuthenticate {0}", Username);
+				}
 				Console.ForegroundColor = ConsoleColor.Blue;
 				Console.WriteLine("({0}) <Web Interface> User {1} logged in.", DateTime.Now.ToString("hh:mm"), userName);
 			}
