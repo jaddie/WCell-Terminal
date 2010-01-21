@@ -23,7 +23,12 @@
 	<body>
 		<div id="logo"></div>
 		<div id="console">
-			<pre>
+			<div id="tabs">
+				<ul>
+					<li><a href="#tab-1"><span>Console</span></a></li>
+				</ul>
+			<div id="tab-1">
+				<pre id="renderer">
 ###  #  ##   ####       ##  ##     #######                       #                ##  
  #  ##  #   #   #        #   #        #                                            #  
  #  ##  #  #             #   #        #                                            #  
@@ -86,7 +91,9 @@
 (11:20) <RealmServer> Loading Items...
 (11:20) <AuthServer> (00:00:36.0778) [Info] New Realm registered: WCell Heroes (at 127.0.0.1:8085)
 (11:20) <RealmServer> Console ready. Type ? for help
-			</pre>
+				</pre>
+			</div>
+		</div>
 		</div>
 	</body>
 </html>

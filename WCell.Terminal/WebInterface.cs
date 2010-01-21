@@ -71,7 +71,8 @@ namespace WCell.Terminal
 				//DigestAuthentication auth = new DigestAuthentication(OnAuthenticate, OnAuthenticationRequired);
 				//_server.AuthenticationModules.Add(auth);
 				_server.ExceptionThrown += OnException;
-				FileModule _module = new FileModule(@"/", Path.Combine(Directory.GetCurrentDirectory(), "WebInterface"));
+				ManagedFileModule _module = new ManagedFileModule(@"/", Path.Combine(Directory.GetCurrentDirectory(), "WebInterface"));
+				_module.MimeTypes.Add("default", "application/octet-stream");
 				foreach (var mimetype in AllowedMimeTypes)
 				{
 					var sbstr = mimetype.Split(',');
@@ -103,6 +104,7 @@ namespace WCell.Terminal
 					}
 				}
 				_server.Add(_module);
+				_server.Add(new RedirectRule("/", "/index.html"));
 				if (UseSSL)
 				{
 					try
@@ -182,6 +184,14 @@ namespace WCell.Terminal
 			Console.WriteLine("({0}) <Web Interface> {1}", DateTime.Now.ToString("hh:mm"), e);
 		}
 
+		/// <summary>
+		/// Delegate used to let authentication modules authenticate the user name and password.
+		/// </summary>
+		/// <param name="realm">Realm that the user want to authenticate in</param>
+		/// <param name="userName">User name specified by client</param>
+		/// <param name="password">Password supplied by the delegate</param>
+		/// <param name="login">object that will be stored in a session variable called <see cref="AuthenticationModule.AuthenticationTag"/> if authentication was successful.</param>
+		/// <exception cref="ForbiddenException">throw forbidden exception if too many attempts have been made.</exception>
 		private bool OnAuthenticationRequired(IHttpRequest request)
 		{
 			return request.Uri.AbsolutePath.StartsWith("/");
@@ -204,38 +214,5 @@ namespace WCell.Terminal
 				login = null;
 			}
 		}
-
-		/*private void OnRequest(object source, RequestEventArgs args)
-		{
-			IHttpClientContext context = (IHttpClientContext)source;
-			IHttpRequest request = args.Request;
-			IHttpResponse response = request.CreateResponse(context);
-			if (request.Secure)
-			{
-				Console.WriteLine("({0}) <Web Interface> Secure request from {1} {2} {3} {4}", DateTime.Now.ToString("hh:mm"), request.RemoteEndPoint, request.HttpVersion, request.Method, request.UriPath);				
-			}
-			else
-			{
-				Console.WriteLine("({0}) <Web Interface> Request from {1} {2} {3} {4}", DateTime.Now.ToString("hh:mm"), request.RemoteEndPoint, request.HttpVersion, request.Method, request.UriPath);
-			}
-
-			if (request.Uri.AbsolutePath == "/hello")
-			{
-				context.Respond("Hello to you too!");
-			}
-			else if (request.UriParts.Length == 1 && request.UriParts[0] == "goodbye")
-			{
-				StreamWriter writer = new StreamWriter(response.Body);
-				writer.WriteLine("Goodbye to you too!");
-				writer.Flush();
-				response.Send();
-			}
-			else
-			{
-				byte[] body = Encoding.UTF8.GetBytes("Hello secure you!");
-				response.Body.Write(body, 0, body.Length);
-				response.Send();
-			}
-		}*/
 	}
 }

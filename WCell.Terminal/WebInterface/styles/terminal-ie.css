@@ -1,8 +1,9 @@
 #console {
 	font-size: 0.8em;
 }
-pre {
-	width: 98%;
-	height: 50%;
+#renderer {
 	white-space: inherit;
+}
+#tab-1 {
+	height: 450px;
 }

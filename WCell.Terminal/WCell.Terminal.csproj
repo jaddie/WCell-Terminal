@@ -73,6 +73,7 @@
   <ItemGroup>
     <Compile Include="ArgumentList.cs" />
     <Compile Include="Check.cs" />
+    <Compile Include="ManagedFileModule.cs" />
     <Compile Include="SysTrayNotifyIcon.cs" />
     <Compile Include="TerminalConfiguration.cs" />
     <Compile Include="WCellConfig.cs" />
@@ -145,10 +146,13 @@
     <Content Include="WebInterface\favicon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\images\wcell_logo.png">
+    <Content Include="WebInterface\images\dialog_bg.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\images\wcell_logo_big.png">
+    <Content Include="WebInterface\images\dialog_title_bg.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="WebInterface\images\wcell_logo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="WebInterface\index.html">
