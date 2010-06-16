@@ -82,11 +82,11 @@ namespace WCell.Terminal
 			}
 		}
 
-        protected override void OnConnecting()
-        {
+		protected override void OnConnecting()
+		{
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine("({0}) <IRC Interface> * Connecting to {1} ({2})", DateTime.Now.ToString("hh:mm"), Client.RemoteAddress, Client.RemotePort);
-        }
+		}
 
 		protected override void OnConnected()
 		{
@@ -236,6 +236,11 @@ namespace WCell.Terminal
 		{
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine("({0}) <IRC Interface> * Unknown command {1} ({2})", DateTime.Now.ToString("hh:mm"), trigger, ex);
+		}
+
+		protected override void OnUnknownCommandUsed(CmdTrigger trigger)
+		{
+			return;
 		}
 	}
 }

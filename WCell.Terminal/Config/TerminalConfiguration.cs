@@ -21,6 +21,7 @@ namespace WCell.Terminal
 		public static int ConsoleWidth = 80;
 		public static int ConsoleHeight = 25;
 		public static bool ConsoleCenterOnScreen = true;
+		public static bool TransparentConsole = false;
 		public static bool AutoStartAuthServer = true;
 		public static bool AutoStartRealmServer = true;
 		public static string AuthServerPath = Path.Combine(Directory.GetCurrentDirectory(), "WCell.AuthServerConsole.exe");

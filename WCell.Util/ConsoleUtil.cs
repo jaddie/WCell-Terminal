@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
-using System.Reflection;
-using System.Diagnostics;
 using Microsoft.Win32;
 
 namespace WCell.Util
@@ -75,6 +70,31 @@ namespace WCell.Util
 		[DllImport("user32")]
 		public static extern int SendMessage(IntPtr hwnd, int message, int wParam, IntPtr lParam);
 
+		[DllImport("dwmapi", PreserveSig = false)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool DwmIsCompositionEnabled();
+
+		[DllImport("dwmapi")]
+		public static extern void DwmEnableBlurBehindWindow(IntPtr hwnd, ref DWM_BLURBEHIND blurBehind);
+
+		public enum DWM_BB
+		{
+			Enable = 1,
+			BlurRegion = 2,
+			TransitionMaximized = 4
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct DWM_BLURBEHIND
+		{
+			public DWM_BB dwFlags;
+			public bool fEnable;
+			public IntPtr hRgnBlur;
+			public bool fTransitionOnMaximized;
+		}
+
+		public const int DWM_BB_ENABLE = 0x00000001;
+
 		public static void SetConsoleIcon(Icon icon)
 		{
 			SetConsoleIcon(icon.Handle);
@@ -128,12 +148,12 @@ namespace WCell.Util
 			for (var i = 0; i <= 9; i++)
 			{
 				SetConsoleFont(i);
-				COORD FontSize = GetConsoleFontSize();
+				var FontSize = GetConsoleFontSize();
 				if (FontSize.X == 6 && FontSize.Y == 11)
 				{
 					break;
 				}
-				else if (FontSize.X == 8 && FontSize.Y == 12)
+				if (FontSize.X == 8 && FontSize.Y == 12)
 				{
 					break;
 				}
@@ -142,7 +162,7 @@ namespace WCell.Util
 
 		public static void SetConsoleFont(int font)
 		{
-			IntPtr hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+			var hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 			if (hConsoleOutput != IntPtr.Zero)
 			{
 				SetConsoleFont(hConsoleOutput, font);
@@ -192,6 +212,19 @@ namespace WCell.Util
 					ShowWindow(hWnd, 1);
 					SetForegroundWindow(hWnd);
 				}
+			}
+		}
+
+		public static void TransparentConsole()
+		{
+			if (DwmIsCompositionEnabled())
+			{
+				DWM_BLURBEHIND bb;
+				bb.dwFlags = (DWM_BB)DWM_BB_ENABLE;
+				bb.fEnable = true;
+				bb.fTransitionOnMaximized = true;
+				bb.hRgnBlur = IntPtr.Zero;
+                DwmEnableBlurBehindWindow(GetConsoleWindow(), ref bb);
 			}
 		}
 	}

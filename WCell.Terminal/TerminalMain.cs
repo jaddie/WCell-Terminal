@@ -15,28 +15,24 @@ namespace WCell.Terminal
 {
 	class TerminalMain : ApplicationContext
 	{
-		public static SysTrayNotifyIcon notification;
+		public static SysTrayNotifyIcon Notification;
 		public static ProcessRunner AuthServer;
 		public static ProcessRunner RealmServer;
 
-		#region Config
-		private static TerminalConfiguration m_configuration;
-		public TerminalConfiguration Configuration
-		{
-			get { return m_configuration; }
-		}
-		#endregion
-
 		static void ConsoleEventHandler()
 		{
-			notification.Dispose();
+			Notification.Dispose();
 		}
 
 		public TerminalMain()
 		{
-			notification = new SysTrayNotifyIcon();
-			notification.Visible = true;
-			m_configuration = new TerminalConfiguration(Application.ExecutablePath);
+			new TerminalConfiguration(Application.ExecutablePath);
+			Notification = new SysTrayNotifyIcon { Visible = true };
+
+			if (TerminalConfiguration.TransparentConsole)
+			{
+				ConsoleUtil.TransparentConsole();
+			}
 
 			if (TerminalConfiguration.ConsoleCenterOnScreen)
 			{

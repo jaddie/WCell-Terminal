@@ -6,33 +6,30 @@ using System.Net;
 using System.Net.Sockets;
 using System.Net.Security;
 using System.IO;
-using HttpServer;
-using HttpServer.Authentication;
-using HttpServer.Exceptions;
-using HttpServer.HttpModules;
-using HttpServer.Rules;
-using HttpListener = HttpServer.HttpListener;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Authentication;
+using HttpServer;
+using HttpServer.Routing;
+using HttpServer.Resources;
+using HttpServer.Authentication;
+using HttpServer.Modules;
+using HttpServer.Headers;
+using HttpServer.Messages;
+using HttpServer.Logging;
+using HttpServer.Tools;
+using HttpListener = HttpServer.HttpListener;
 
 namespace WCell.Terminal
 {
 	class WebInterface
 	{
-		class User
-		{
-			public int id;
-			public string userName;
-			public User(int id, string userName)
-			{
-				this.id = id;
-				this.userName = userName;
-			}
-		}
-
-		private HttpServer.HttpServer _server;
-		private X509Certificate2 _cert;
-		private string[] AuthedUsers;
+		private X509Certificate2 certificate;
+		private Server server;
+		private FileResources resource;
+		private FileModule reader;
+		private HttpListener listener;
+		private SecureHttpListener securelistener;
+		private ManagedFileModule interpreter;
 
 		public static bool WebInterfaceEnabled = true;
 		public static bool WebInterfaceDebug = false;
@@ -40,7 +37,7 @@ namespace WCell.Terminal
 		public static int Port = 8080;
 		public static bool UseSSL = false;
 		public static bool UseDigestAuth = false;
-		public static string CertificatePath = Path.Combine(Directory.GetCurrentDirectory(), "certificate.cer");		
+		public static string CertificatePath = Path.Combine(Directory.GetCurrentDirectory(), "certificate.cer");
 		public static string Username = "Admin";
 		public static string Password = "passw0rd";
 		public static string[] AllowedMimeTypes = {
@@ -50,17 +47,10 @@ namespace WCell.Terminal
 			"css,text/css",
 			"js,application/x-javascript",
 			"ico,image/x-icon",
-			"bmp,image/bmp",
-			"dib,image/bmp",
 			"png,image/png",
-			"pnz,image/png",
-			"jpe,image/jpeg",
-			"jpeg,image/jpeg",
 			"jpg,image/jpeg",
-			"jfif,image/jpeg",
 			"gif,image/gif",
-			"tif,image/tiff",
-			"tiff,image/tiff",
+			"wav,audio/x-wav",
 			"jar,application/java-archive",
 			"swf,application/x-shockwave-flash"
 		};
@@ -69,20 +59,61 @@ namespace WCell.Terminal
 		{
 			if (WebInterfaceEnabled)
 			{
-				_server = new HttpServer.HttpServer();
+				this.server = new Server();
+				this.interpreter = new ManagedFileModule();
+				this.server.Add(this.interpreter);
+				this.reader = new FileModule();
+				this.resource = new FileResources("/", Path.Combine(Directory.GetCurrentDirectory(), "WebInterface"));
+				this.reader.Resources.Add(resource);
+				this.server.Add(this.reader);
+				this.server.Add(new SimpleRouter("/", "/index.html"));
+
 				if (WebInterfaceDebug)
 				{
-					_server.LogWriter = new ConsoleLogWriter();
+					if (UseSSL)
+					{
+						//
+					}
+					else
+					{
+						//
+					}
 				}
-				_server.ServerName = "WCell.Terminal";
-				if (UseDigestAuth)
+
+				if (UseSSL)
 				{
-					DigestAuthentication auth = new DigestAuthentication(OnAuthenticate, OnAuthenticationRequired);
-					_server.AuthenticationModules.Add(auth);
+					try
+					{
+						this.certificate = new X509Certificate2(CertificatePath);
+					}
+					catch (DirectoryNotFoundException)
+					{
+						Console.ForegroundColor = ConsoleColor.Yellow;
+						Console.WriteLine("({0}) <Web Interface> Error: The directory specified could not be found.", DateTime.Now.ToString("hh:mm"));
+					}
+					catch (IOException)
+					{
+						Console.ForegroundColor = ConsoleColor.Yellow;
+						Console.WriteLine("({0}) <Web Interface> Error: A file in the directory could not be accessed.", DateTime.Now.ToString("hh:mm"));
+					}
+					catch (NullReferenceException)
+					{
+						Console.ForegroundColor = ConsoleColor.Yellow;
+						Console.WriteLine("({0}) <Web Interface> File must be a .cer file. Program does not have access to that type of file.", DateTime.Now.ToString("hh:mm"));
+					}
+					Console.ForegroundColor = ConsoleColor.Yellow;
+					Console.WriteLine("({0}) <Web Interface> Loaded Certificate: {1} Valid Date: {2} Expiry Date: {3}", DateTime.Now.ToString("hh:mm"), Path.GetFileName(CertificatePath), this.certificate.NotBefore, this.certificate.NotAfter);
+					this.securelistener = (SecureHttpListener) HttpListener.Create(IPAddress.Parse(ListenAddress), Port, this.certificate);
+					this.securelistener.UseClientCertificate = true;
+					this.server.Add(this.securelistener);
 				}
-				_server.ExceptionThrown += OnException;
-				ManagedFileModule _module = new ManagedFileModule(@"/", Path.Combine(Directory.GetCurrentDirectory(), "WebInterface"));
-				_module.MimeTypes.Add("default", "application/octet-stream");
+				else
+				{
+					this.listener = HttpListener.Create(IPAddress.Parse(ListenAddress), Port);
+					this.server.Add(this.listener);
+				}
+				this.reader.ContentTypes.Clear();
+				this.reader.ContentTypes.Add("default", new ContentTypeHeader("application/octet-stream"));
 				foreach (var mimetype in AllowedMimeTypes)
 				{
 					var sbstr = mimetype.Split(',');
@@ -93,176 +124,43 @@ namespace WCell.Terminal
 							{
 								try
 								{
-									_module.MimeTypes.Add(sbstr[0], sbstr[1]);
+									this.reader.ContentTypes.Add(sbstr[0], new ContentTypeHeader(sbstr[1]));
 								}
 								catch (ArgumentException)
 								{
-									Console.ForegroundColor = ConsoleColor.Blue;
+									Console.ForegroundColor = ConsoleColor.Yellow;
 									Console.WriteLine("({0}) <Web Interface> Config.xml contains duplicate Mime Types.", DateTime.Now.ToString("hh:mm"));
 								}
 							}
 							else
 							{
-								Console.ForegroundColor = ConsoleColor.Blue;
+								Console.ForegroundColor = ConsoleColor.Yellow;
 								Console.WriteLine("({0}) <Web Interface> Config.xml contains invalid Mime Types.", DateTime.Now.ToString("hh:mm"));
 							}
 							break;
 						default:
-							Console.ForegroundColor = ConsoleColor.Blue;
+							Console.ForegroundColor = ConsoleColor.Yellow;
 							Console.WriteLine("({0}) <Web Interface> Config.xml contains invalid Mime Types.", DateTime.Now.ToString("hh:mm"));
 							break;
 					}
 				}
-				_server.Add(_module);
-				_server.Add(new RedirectRule("/", "/index.html"));
-				if (UseSSL)
+				try
 				{
-					try
-					{
-						_cert = new X509Certificate2(CertificatePath);
-						Console.ForegroundColor = ConsoleColor.Blue;
-						Console.WriteLine("({0}) <Web Interface> Loaded Certificate: {1} Valid Date: {2} Expiry Date: {3}", DateTime.Now.ToString("hh:mm"), Path.GetFileName(CertificatePath), _cert.NotBefore, _cert.NotAfter);
-						try
-						{
-							_server.Start(IPAddress.Parse(ListenAddress), Port, _cert, SslProtocols.Default, ValidateServerCertificate, false);
-							Console.ForegroundColor = ConsoleColor.Blue;
-							Console.WriteLine("({0}) <Web Interface> Running on Port {1}...", DateTime.Now.ToString("hh:mm"), Port);
-						}
-						catch (SocketException e)
-						{
-							Console.ForegroundColor = ConsoleColor.Red;
-							Console.WriteLine("({0}) <Web Interface> {1}", DateTime.Now.ToString("hh:mm"), e);
-						}
-					}
-					catch (DirectoryNotFoundException)
-					{
-						Console.ForegroundColor = ConsoleColor.Blue;
-						Console.WriteLine("({0}) <Web Interface> Error: The directory specified could not be found.", DateTime.Now.ToString("hh:mm"));
-					}
-					catch (IOException)
-					{
-						Console.ForegroundColor = ConsoleColor.Blue;
-						Console.WriteLine("({0}) <Web Interface> Error: A file in the directory could not be accessed.", DateTime.Now.ToString("hh:mm"));
-					}
-					catch (NullReferenceException)
-					{
-						Console.ForegroundColor = ConsoleColor.Blue;
-						Console.WriteLine("({0}) <Web Interface> File must be a .cer file. Program does not have access to that type of file.", DateTime.Now.ToString("hh:mm"));
-					}
+					this.server.Start(5);
+					SessionManager.Start(this.server);
+					Console.ForegroundColor = ConsoleColor.Yellow;
+					Console.WriteLine("({0}) <Web Interface> Running on Port {1}...", DateTime.Now.ToString("hh:mm"), Port);
 				}
-				else
+				catch (SocketException e)
 				{
-					try
-					{
-						_server.Start(IPAddress.Parse(ListenAddress), Port);
-						Console.ForegroundColor = ConsoleColor.Blue;
-						Console.WriteLine("({0}) <Web Interface> Running on Port {1}...", DateTime.Now.ToString("hh:mm"), Port);
-					}
-					catch (SocketException e)
-					{
-						Console.ForegroundColor = ConsoleColor.Red;
-						Console.WriteLine("({0}) <Web Interface> {1}", DateTime.Now.ToString("hh:mm"), e);
-					}
+					Console.ForegroundColor = ConsoleColor.Yellow;
+					Console.WriteLine("({0}) <Web Interface> {1}", DateTime.Now.ToString("hh:mm"), e);
 				}
 			}
 			else
 			{
-				Console.ForegroundColor = ConsoleColor.Blue;
+				Console.ForegroundColor = ConsoleColor.Yellow;
 				Console.WriteLine("({0}) <Web Interface> Disabled", DateTime.Now.ToString("hh:mm"));
-			}
-		}
-
-		~WebInterface()
-		{
-			_server.Stop();
-		}
-
-		public static bool ValidateServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
-		{
-			if (sslPolicyErrors == SslPolicyErrors.None)
-			{
-				return true;
-			}
-			Console.ForegroundColor = ConsoleColor.Blue;
-			Console.WriteLine("{0}) <Web Interface> Certificate error: {1}", DateTime.Now.ToString("hh:mm"), sslPolicyErrors);
-			return false;
-		}
-
-		private void OnException(object source, Exception e)
-		{
-			Console.ForegroundColor = ConsoleColor.Red;
-			Console.WriteLine("({0}) <Web Interface> {1}", DateTime.Now.ToString("hh:mm"), e);
-		}
-
-		private bool OnAuthenticationRequired(IHttpRequest request)
-		{
-			for (var i = 0; i < request.Headers.Count; i++)
-			{
-				string Header = request.Headers.Get(i);
-				if (Header.StartsWith("Digest"))
-				{
-					string[] Values = Header.Replace("Digest ", String.Empty).Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-					foreach (var val in Values)
-					{
-						if (val.StartsWith("username"))
-						{
-							string[] Parse = val.Split(new char[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
-							if (Parse.Length != 0)
-							{
-								string Username = Parse[1].Replace("\"", String.Empty);
-								try
-								{
-									foreach (var user in AuthedUsers)
-									{
-										Console.WriteLine("OnAuthenticationRequired {0}", user);
-										if (Username == user)
-										{
-											return false;
-										}
-									}
-								}
-								catch (NullReferenceException e)
-								{
-									Console.WriteLine("OnAuthenticationRequired {0}", e);
-								}
-							}
-						}
-					}
-				}
-			}
-			Console.WriteLine("OnAuthenticationRequired /");
-			return request.Uri.AbsolutePath.StartsWith("/");
-		}
-
-		/// <summary>
-		/// Delegate used to let authentication modules authenticate the user name and password.
-		/// </summary>
-		/// <param name="realm">Realm that the user want to authenticate in</param>
-		/// <param name="userName">User name specified by client</param>
-		/// <param name="password">Password supplied by the delegate</param>
-		/// <param name="login">object that will be stored in a session variable called <see cref="AuthenticationModule.AuthenticationTag"/> if authentication was successful.</param>
-		/// <exception cref="ForbiddenException">throw forbidden exception if too many attempts have been made.</exception>
-		private void OnAuthenticate(string realm, string userName, ref string password, out object login)
-		{
-			if (userName == Username)
-			{
-				password = Password;
-				login = new User(1, Username);
-				AuthedUsers = new string[] { Username };
-				//login = Session[AuthenticationModule.AuthenticationTag];
-				foreach (var user in AuthedUsers)
-				{
-					Console.WriteLine("OnAuthenticate {0}", Username);
-				}
-				Console.ForegroundColor = ConsoleColor.Blue;
-				Console.WriteLine("({0}) <Web Interface> User {1} logged in.", DateTime.Now.ToString("hh:mm"), userName);
-			}
-			else
-			{
-				Console.ForegroundColor = ConsoleColor.Red;
-				Console.WriteLine("({0}) <Web Interface> User {1} tryied to login with invalid password {2}.", DateTime.Now.ToString("hh:mm"), userName, password);
-				password = string.Empty;
-				login = null;
 			}
 		}
 	}

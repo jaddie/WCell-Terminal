@@ -1,19 +1,25 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{E57C4971-D526-4969-BAF8-68DD0A990CA1}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WCell.Terminal</RootNamespace>
     <AssemblyName>WCell.Terminal</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ApplicationIcon>Resources\WCell.Terminal.ico</ApplicationIcon>
     <StartupObject>WCell.Terminal.TerminalMain</StartupObject>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>3.5</OldToolsVersion>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -26,9 +32,9 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -40,6 +46,7 @@
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -49,11 +56,20 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>false</UseVSHostingProcess>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="HttpServer, Version=1.0.0.0, Culture=neutral, PublicKeyToken=d7063c47c583695a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="HttpServer">
       <HintPath>..\WCell.Lib\HttpServer.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\WCell.Lib\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Squishy.Irc">
+      <HintPath>..\WCell.Lib\Squishy.Irc.dll</HintPath>
+    </Reference>
+    <Reference Include="Squishy.Network">
+      <HintPath>..\WCell.Lib\Squishy.Network.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -69,9 +85,12 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WCell.Util">
+      <HintPath>..\WCell.Util\bin\Debug\WCell.Util.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Interfaces\WebInterface\PHPModule.cs" />
+    <Compile Include="Interfaces\WebInterface\SessionManager.cs" />
     <Compile Include="Utils\ArgumentList.cs" />
     <Compile Include="Utils\Check.cs" />
     <Compile Include="Interfaces\WebInterface\ManagedFileModule.cs" />
@@ -93,20 +112,6 @@
     <Compile Include="Interfaces\WebInterface\WebInterface.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Squishy.Irc\Squishy.Irc.csproj">
-      <Project>{7E1B9148-4616-419E-BA43-0413500D56FB}</Project>
-      <Name>Squishy.Irc</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Squishy.Network\Squishy.Network.csproj">
-      <Project>{86B7C009-4933-40DF-9847-42B32B39FC61}</Project>
-      <Name>Squishy.Network</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WCell.Util\WCell.Util.csproj">
-      <Project>{F753AF28-A251-4C12-9335-07E8236184F2}</Project>
-      <Name>WCell.Util</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -117,6 +122,11 @@
     <EmbeddedResource Include="Resources\WCell.Terminal.ico" />
   </ItemGroup>
   <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
       <Visible>False</Visible>
       <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
@@ -132,6 +142,11 @@
       <ProductName>.NET Framework 3.5</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
       <Visible>False</Visible>
       <ProductName>Windows Installer 3.1</ProductName>
@@ -139,6 +154,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="Resources\LerosC.fon">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -147,10 +163,16 @@
     <Content Include="WebInterface\favicon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="WebInterface\images\beep.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="WebInterface\images\dialog_bg.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\images\dialog_title_bg.png">
+    <Content Include="WebInterface\images\enabled.gif">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="WebInterface\images\icon_console.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="WebInterface\images\wcell_logo.png">
@@ -159,16 +181,25 @@
     <Content Include="WebInterface\index.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\java\ie6pngfix.js">
+    <Content Include="WebInterface\java\basic.js" />
+    <Content Include="WebInterface\java\ie6pngfix.js" />
+    <Content Include="WebInterface\java\jquery.center.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\java\jquery-1.4.min.js">
+    <Content Include="WebInterface\java\jquery.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\java\jquery-ui-1.7.2.min.js">
+    <Content Include="WebInterface\java\jquery.ui.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="WebInterface\java\shell_in_a_box.js" />
     <Content Include="WebInterface\java\terminal.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="WebInterface\java\vt100.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="WebInterface\java\wcell.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="WebInterface\styles\terminal-ie.css">
@@ -178,6 +209,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="WebInterface\styles\terminal.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="WebInterface\styles\themes\base\images\ui-anim_basic_16x16.gif">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="WebInterface\styles\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png">
@@ -198,16 +232,10 @@
     <Content Include="WebInterface\styles\themes\base\images\ui-bg_glass_75_e6e6e6_1x400.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\base\images\ui-bg_glass_75_ffffff_1x400.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="WebInterface\styles\themes\base\images\ui-bg_glass_95_fef1ec_1x400.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="WebInterface\styles\themes\base\images\ui-bg_highlight-soft_75_cccccc_1x100.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="WebInterface\styles\themes\base\images\ui-bg_inset-soft_95_fef1ec_1x100.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="WebInterface\styles\themes\base\images\ui-icons_222222_256x240.png">
@@ -225,187 +253,140 @@
     <Content Include="WebInterface\styles\themes\base\images\ui-icons_cd0a0a_256x240.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\base\ui.accordion.css">
+    <Content Include="WebInterface\styles\themes\base\jquery.ui.accordion.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\base\ui.all.css">
+    <Content Include="WebInterface\styles\themes\base\jquery.ui.all.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\base\ui.base.css">
+    <Content Include="WebInterface\styles\themes\base\jquery.ui.autocomplete.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\base\ui.core.css">
+    <Content Include="WebInterface\styles\themes\base\jquery.ui.base.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\base\ui.datepicker.css">
+    <Content Include="WebInterface\styles\themes\base\jquery.ui.button.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\base\ui.dialog.css">
+    <Content Include="WebInterface\styles\themes\base\jquery.ui.core.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\base\ui.progressbar.css">
+    <Content Include="WebInterface\styles\themes\base\jquery.ui.datepicker.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\base\ui.resizable.css">
+    <Content Include="WebInterface\styles\themes\base\jquery.ui.dialog.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\base\ui.slider.css">
+    <Content Include="WebInterface\styles\themes\base\jquery.ui.progressbar.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\base\ui.tabs.css">
+    <Content Include="WebInterface\styles\themes\base\jquery.ui.resizable.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\base\ui.theme.css">
+    <Content Include="WebInterface\styles\themes\base\jquery.ui.selectable.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\images\ui-bg_diagonals-thick_90_eeeeee_40x40.png">
+    <Content Include="WebInterface\styles\themes\base\jquery.ui.slider.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\images\ui-bg_flat_15_cd0a0a_40x100.png">
+    <Content Include="WebInterface\styles\themes\base\jquery.ui.tabs.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\images\ui-bg_glass_100_e4f1fb_1x400.png">
+    <Content Include="WebInterface\styles\themes\base\jquery.ui.theme.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\images\ui-bg_glass_50_3baae3_1x400.png">
+    <Content Include="WebInterface\styles\themes\humanity\images\ui-anim_basic_16x16.gif">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\images\ui-bg_glass_80_d7ebf9_1x400.png">
+    <Content Include="WebInterface\styles\themes\humanity\images\ui-bg_flat_75_aaaaaa_40x100.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\images\ui-bg_highlight-hard_100_f2f5f7_1x100.png">
+    <Content Include="WebInterface\styles\themes\humanity\images\ui-bg_glass_100_f5f0e5_1x400.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\images\ui-bg_highlight-hard_70_000000_1x100.png">
+    <Content Include="WebInterface\styles\themes\humanity\images\ui-bg_glass_25_cb842e_1x400.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\images\ui-bg_highlight-soft_100_deedf7_1x100.png">
+    <Content Include="WebInterface\styles\themes\humanity\images\ui-bg_glass_70_ede4d4_1x400.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\images\ui-bg_highlight-soft_25_ffef8f_1x100.png">
+    <Content Include="WebInterface\styles\themes\humanity\images\ui-bg_highlight-hard_100_f4f0ec_1x100.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\images\ui-icons_2694e8_256x240.png">
+    <Content Include="WebInterface\styles\themes\humanity\images\ui-bg_highlight-hard_65_fee4bd_1x100.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\images\ui-icons_2e83ff_256x240.png">
+    <Content Include="WebInterface\styles\themes\humanity\images\ui-bg_highlight-hard_75_f5f5b5_1x100.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\images\ui-icons_3d80b3_256x240.png">
+    <Content Include="WebInterface\styles\themes\humanity\images\ui-bg_inset-soft_100_f4f0ec_1x100.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\images\ui-icons_72a7cf_256x240.png">
+    <Content Include="WebInterface\styles\themes\humanity\images\ui-icons_c47a23_256x240.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\images\ui-icons_ffffff_256x240.png">
+    <Content Include="WebInterface\styles\themes\humanity\images\ui-icons_cb672b_256x240.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\ui.accordion.css">
+    <Content Include="WebInterface\styles\themes\humanity\images\ui-icons_f08000_256x240.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\ui.all.css">
+    <Content Include="WebInterface\styles\themes\humanity\images\ui-icons_f35f07_256x240.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\ui.base.css">
+    <Content Include="WebInterface\styles\themes\humanity\images\ui-icons_ff7519_256x240.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\ui.core.css">
+    <Content Include="WebInterface\styles\themes\humanity\images\ui-icons_ffffff_256x240.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\ui.datepicker.css">
+    <Content Include="WebInterface\styles\themes\humanity\jquery.ui.accordion.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\ui.dialog.css">
+    <Content Include="WebInterface\styles\themes\humanity\jquery.ui.all.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\ui.progressbar.css">
+    <Content Include="WebInterface\styles\themes\humanity\jquery.ui.autocomplete.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\ui.resizable.css">
+    <Content Include="WebInterface\styles\themes\humanity\jquery.ui.base.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\ui.slider.css">
+    <Content Include="WebInterface\styles\themes\humanity\jquery.ui.button.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\ui.tabs.css">
+    <Content Include="WebInterface\styles\themes\humanity\jquery.ui.core.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\cupertino\ui.theme.css">
+    <Content Include="WebInterface\styles\themes\humanity\jquery.ui.datepicker.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\images\ui-bg_flat_0_aaaaaa_40x100.png">
+    <Content Include="WebInterface\styles\themes\humanity\jquery.ui.dialog.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\images\ui-bg_flat_75_ffffff_40x100.png">
+    <Content Include="WebInterface\styles\themes\humanity\jquery.ui.progressbar.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\images\ui-bg_glass_55_fbf9ee_1x400.png">
+    <Content Include="WebInterface\styles\themes\humanity\jquery.ui.resizable.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\images\ui-bg_glass_65_ffffff_1x400.png">
+    <Content Include="WebInterface\styles\themes\humanity\jquery.ui.selectable.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\images\ui-bg_glass_75_dadada_1x400.png">
+    <Content Include="WebInterface\styles\themes\humanity\jquery.ui.slider.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\images\ui-bg_glass_75_e6e6e6_1x400.png">
+    <Content Include="WebInterface\styles\themes\humanity\jquery.ui.tabs.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\images\ui-bg_glass_95_fef1ec_1x400.png">
+    <Content Include="WebInterface\styles\themes\humanity\jquery.ui.theme.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\images\ui-bg_highlight-soft_75_cccccc_1x100.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\images\ui-icons_222222_256x240.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\images\ui-icons_2e83ff_256x240.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\images\ui-icons_454545_256x240.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\images\ui-icons_888888_256x240.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\images\ui-icons_cd0a0a_256x240.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\ui.accordion.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\ui.all.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\ui.base.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\ui.core.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\ui.datepicker.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\ui.dialog.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\ui.progressbar.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\ui.resizable.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\ui.slider.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\ui.tabs.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="WebInterface\styles\themes\smoothness\ui.theme.css">
+    <Content Include="WebInterface\styles\vt100.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

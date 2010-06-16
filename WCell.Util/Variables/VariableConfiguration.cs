@@ -307,7 +307,6 @@ namespace WCell.Util.Variables
 			var types = asm.GetTypes();
 			foreach (var type in types)
 			{
-
 				var members = type.GetMembers(BindingFlags.Public | BindingFlags.Static);
 				InitMembers<A>(members);
 
